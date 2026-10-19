@@ -1,0 +1,344 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import BgWaveDivider from '@/components/public/bgWaveDivider';
+import PaslonSlider from '@/components/public/PaslonSlider';
+import { getPublikPaslonList } from '@/api/publlic/paslon';
+import { submitSuaraVoting, checkMhsVoted } from '@/api/publlic/voting';
+import {
+  Vote,
+  User,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  X,
+  LogOut,
+  ShieldCheck,
+  ChevronRight,
+  Info,
+} from 'lucide-react';
+
+export default function BilikVotingPage() {
+  const router = useRouter();
+
+  const [mhsSession, setMhsSession] = useState(null);
+  const [paslonList, setPaslonList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPaslon, setSelectedPaslon] = useState(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [votingInProgress, setVotingInProgress] = useState(false);
+  const [voteSuccess, setVoteSuccess] = useState(false);
+  const [successInfo, setSuccessInfo] = useState(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // 1. Cek session login pemilih
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('kpu_mhs_session');
+      if (!stored) {
+        router.replace('/voting/login');
+        return;
+      }
+
+      const parsed = JSON.parse(stored);
+      if (!parsed?.id || !parsed?.nim) {
+        sessionStorage.removeItem('kpu_mhs_session');
+        router.replace('/voting/login');
+        return;
+      }
+
+      setMhsSession(parsed);
+
+      // Cek ke server apakah pemilih ini sebenarnya sudah pernah vote
+      checkMhsVoted(parsed.id).then((res) => {
+        if (res.voted) {
+          sessionStorage.removeItem('kpu_mhs_session');
+          alert('Anda sudah pernah menggunakan hak suara. Anda akan dialihkan.');
+          router.replace('/voting/login');
+        }
+      });
+    } catch (e) {
+      router.replace('/voting/login');
+    }
+  }, [router]);
+
+  // 2. Ambil daftar paslon resmi
+  useEffect(() => {
+    async function loadPaslon() {
+      setLoading(true);
+      const res = await getPublikPaslonList();
+      if (res.success) {
+        setPaslonList(res.data || []);
+      }
+      setLoading(false);
+    }
+    loadPaslon();
+  }, []);
+
+  const handleOpenConfirm = (paslon) => {
+    setSelectedPaslon(paslon);
+    setErrorMsg('');
+    setConfirmModalOpen(true);
+  };
+
+  const handleKeluarBilik = () => {
+    if (confirm('Apakah Anda ingin membatalkan dan keluar dari bilik suara?')) {
+      sessionStorage.removeItem('kpu_mhs_session');
+      router.push('/voting/login');
+    }
+  };
+
+  const handleConfirmVote = async () => {
+    if (!selectedPaslon || !mhsSession) return;
+
+    setVotingInProgress(true);
+    setErrorMsg('');
+
+    try {
+      const res = await submitSuaraVoting({
+        mhsId: mhsSession.id,
+        paslonId: selectedPaslon.id,
+      });
+
+      if (!res.success) {
+        setErrorMsg(res.error || 'Gagal menyimpan suara.');
+        setVotingInProgress(false);
+        return;
+      }
+
+      // Berhasil vote! Hapus session agar tidak bisa vote lagi
+      sessionStorage.removeItem('kpu_mhs_session');
+      setVoteSuccess(true);
+      setSuccessInfo({
+        nomorUrut: selectedPaslon.nomor_urut,
+        slogan: selectedPaslon.slogan,
+        capres: selectedPaslon.kandidat1?.nama_kandidat,
+        cawapres: selectedPaslon.kandidat2?.nama_kandidat,
+        namaMhs: mhsSession.nama_mhs,
+        nim: mhsSession.nim,
+      });
+      setConfirmModalOpen(false);
+    } catch (err) {
+      setErrorMsg('Terjadi kendala saat merekam suara ke server.');
+    } finally {
+      setVotingInProgress(false);
+    }
+  };
+
+  // Tampilan jika sudah sukses memberikan suara
+  if (voteSuccess && successInfo) {
+    return (
+      <div className="min-h-screen flex flex-col bg-transparent text-zinc-900 dark:text-zinc-100 transition-colors">
+        <div className="relative pt-12 sm:pt-20 pb-0 bg-zinc-100/70 dark:bg-[#071710]">
+          <div className="max-w-xl mx-auto text-center space-y-3 px-4 sm:px-6 pb-8">
+            <div className="w-16 h-16 mx-auto rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-900 dark:text-zinc-100">
+              <CheckCircle2 className="w-9 h-9" />
+            </div>
+
+            <h1 className="text-2xl sm:text-4xl font-black text-zinc-950 dark:text-zinc-100 tracking-tight">
+              Hak Suara Berhasil Digunakan!
+            </h1>
+
+            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
+              Terima kasih <span className="font-bold text-zinc-900 dark:text-zinc-100">{successInfo.namaMhs}</span> (NIM: {successInfo.nim}). Pilihan suara Anda telah dicatat secara sah dan rahasia oleh sistem KPU Mahasiswa.
+            </p>
+          </div>
+
+          <div className="w-full -mb-px leading-none">
+            <BgWaveDivider className="w-full text-white dark:text-black" />
+          </div>
+        </div>
+
+        <div className="flex-1 py-8 sm:py-12 px-4 max-w-md mx-auto w-full space-y-6">
+          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xs space-y-4 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-semibold">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Status: Selesai Memilih</span>
+            </div>
+
+            <div className="py-3 border-y border-zinc-100 dark:border-zinc-800 space-y-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Pilihan Terpilih</p>
+              <p className="text-lg font-black text-zinc-900 dark:text-zinc-100">
+                Pasangan Calon No. {successInfo.nomorUrut}
+              </p>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                {successInfo.capres} {successInfo.cawapres ? `& ${successInfo.cawapres}` : ''}
+              </p>
+            </div>
+
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Sesuai ketentuan KPU Mahasiswa, setiap mahasiswa hanya dapat memilih 1 kali dan akun Anda telah keluar secara otomatis dari bilik suara.
+            </p>
+
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold transition active:scale-95"
+            >
+              <span>Kembali ke Halaman Utama</span>
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-transparent text-zinc-900 dark:text-zinc-100 transition-colors">
+      {/* Hero Header Bilik Suara */}
+      <div className="relative pt-8 sm:pt-14 pb-0 bg-blue-50/60 dark:bg-[#0b0f19]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-4">
+          {/* Bar Info Pemilih */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-white/90 dark:bg-zinc-900/90 border border-zinc-200/90 dark:border-zinc-800 backdrop-blur-md shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center shrink-0">
+                <User className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                  {mhsSession?.nama_mhs || 'Mahasiswa'}
+                </p>
+                <p className="text-[10px] text-zinc-500 font-mono">
+                  NIM: {mhsSession?.nim || '-'} • <span className="text-zinc-800 dark:text-zinc-200 font-semibold">Hak Suara Aktif</span>
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleKeluarBilik}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border border-zinc-200 dark:border-zinc-800 transition cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Keluar Bilik</span>
+            </button>
+          </div>
+
+          <div className="text-center space-y-2 pt-2">
+            <h1 className="text-2xl sm:text-4xl font-black text-blue-950 dark:text-zinc-100 tracking-tight">
+              Bilik Suara Pemilihan Mahasiswa
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
+              Geser kartu paslon untuk membandingkan calon, perbesar untuk meninjau visi-misi lengkap, lalu tentukan pilihan Anda.
+            </p>
+          </div>
+        </div>
+
+        {/* BgWaveDivider Sambungan Mulus */}
+        <div className="w-full -mb-px leading-none">
+          <BgWaveDivider className="w-full text-white dark:text-black" />
+        </div>
+      </div>
+
+      {/* Konten Utama Slider Bilik Suara */}
+      <div className="flex-1 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full space-y-6">
+        {loading ? (
+          <div className="h-64 sm:h-72 rounded-3xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 animate-pulse" />
+        ) : (
+          <PaslonSlider
+            paslonList={paslonList}
+            renderAction={(paslon) => (
+              <button
+                type="button"
+                onClick={() => handleOpenConfirm(paslon)}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
+              >
+                <Vote className="w-4 h-4" />
+                <span>Pilih Paslon No. {paslon.nomor_urut}</span>
+              </button>
+            )}
+            emptyTitle="Belum Ada Pasangan Calon Resmi"
+            emptyDesc="Panitia KPU belum menetapkan daftar pasangan calon untuk pemilu saat ini."
+          />
+        )}
+      </div>
+
+      {/* Modal Konfirmasi Pemilihan Paslon */}
+      {confirmModalOpen && selectedPaslon && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center">
+                  <Vote className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                  Konfirmasi Pilihan Suara
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmModalOpen(false)}
+                disabled={votingInProgress}
+                className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {errorMsg && (
+              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs">
+                {errorMsg}
+              </div>
+            )}
+
+            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 text-center space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-black text-xl mx-auto flex items-center justify-center shadow-xs">
+                {selectedPaslon.nomor_urut}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                  Pasangan Calon No. {selectedPaslon.nomor_urut}
+                </p>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">
+                  {selectedPaslon.kandidat1?.nama_kandidat} {selectedPaslon.kandidat2 ? `& ${selectedPaslon.kandidat2?.nama_kandidat}` : ''}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed bg-zinc-100/80 dark:bg-zinc-900/60 p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-center gap-2 font-bold text-zinc-900 dark:text-zinc-100">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>Peringatan Penting:</span>
+              </div>
+              <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                Pilihan suara Anda bersifat <strong>permanen dan tidak dapat diubah</strong> setelah dikonfirmasi. Setiap mahasiswa hanya memiliki 1 kali kesempatan memilih.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmModalOpen(false)}
+                disabled={votingInProgress}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmVote}
+                disabled={votingInProgress}
+                className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                {votingInProgress ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Merekam Suara...</span>
+                  </>
+                ) : (
+                  <>
+                    <Vote className="w-4 h-4" />
+                    <span>Ya, Konfirmasi Suara</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

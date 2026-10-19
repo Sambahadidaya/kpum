@@ -1,0 +1,1 @@
+dihalaman public saya ingin ada halaman baru yaitu halaman simulasi yang desainnya sama persis seperti halama voting, cuman pada loginnya itu sudah dipersiapkan nim atau id dan passwordnya, dan simulasi ini tidak akan disimpan ke database maupun dilocalstorage, jadi bener bener cuman seliwat. terus untuk navbarnya itu pada tampilan mobile simulasi ini berada di ul voting.

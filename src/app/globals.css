@@ -1,26 +1,388 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-kpu-50: #eff6ff;
+  --color-kpu-100: #dbeafe;
+  --color-kpu-200: #bfdbfe;
+  --color-kpu-300: #93c5fd;
+  --color-kpu-400: #60a5fa;
+  --color-kpu-500: #3b82f6;
+  --color-kpu-600: #2563eb;
+  --color-kpu-700: #1d4ed8;
+  --color-kpu-800: #1e40af;
+  --color-kpu-900: #1e3a8a;
+  --color-kpu-950: #172554;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-main: #ffffff;
+    --bg-card: #ffffff;
+    --bg-section: #f8fafc;
+    --bg-hover: #f1f5f9;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-main: #e2e8f0;
+    --accent: #1e40af;
+    /* Biru KPU LP3I */
+    --accent-hover: #1d4ed8;
+    --accent-text: #ffffff;
+    --accent-light: #eff6ff;
+    --accent-border: #bfdbfe;
+  }
+
+  .dark {
+    --bg-main: #000000;
+    --bg-card: #09090b;
+    --bg-section: #0b0f19;
+    --bg-hover: #151d2f;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-main: #1e293b;
+    --accent: #60a5fa;
+    /* Biru KPU aksen aktif dark mode */
+    --accent-hover: #93c5fd;
+    --accent-text: #09090b;
+    --accent-light: #172554;
+    --accent-border: #1e3a8a;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #93c5fd;
+  border-radius: 9999px;
+}
+
+:root.dark ::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* =========================================================
+   1. POLA BINTIK-BINTIK (DOT MATRIX / DOKUMENTASI STYLE)
+   ========================================================= */
+.bg-dot-matrix {
+  background-image: radial-gradient(rgba(37, 99, 235, 0.22) 1.25px, transparent 1.25px);
+  background-size: 24px 24px;
+}
+
+.dark .bg-dot-matrix {
+  background-image: radial-gradient(rgba(59, 130, 246, 0.28) 1.25px, transparent 1.25px);
+  background-size: 24px 24px;
+}
+
+/* =========================================================
+   2. ANIMASI HEADER CARD: CAHAYA KANAN ATAS KE BAWAH & BORDER MUTER
+   ========================================================= */
+@keyframes light-sweep-right {
+  0% {
+    top: -35%;
+    opacity: 0;
+    transform: translateY(0) scale(0.9);
+  }
+
+  25% {
+    opacity: 0.85;
+  }
+
+  75% {
+    opacity: 0.85;
+  }
+
+  100% {
+    top: 85%;
+    opacity: 0;
+    transform: translateY(10%) scale(1.05);
+  }
+}
+
+.animate-light-sweep-right {
+  animation: light-sweep-right 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes border-spin-360 {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-border-spin {
+  animation: border-spin-360 3s linear infinite;
+}
+
+/* =========================================================
+   3. ANIMASI GARIS PUTUS-PUTUS TIMELINE MENGALIR (SNAKE LINE)
+   ========================================================= */
+@keyframes dash-flow-right {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 24px 0;
+  }
+}
+
+@keyframes dash-flow-left {
+  from {
+    background-position: 24px 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes dash-flow-down {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 0 24px;
+  }
+}
+
+.dashed-line-right {
+  background-image: linear-gradient(to right, #3b82f6 55%, transparent 45%);
+  background-size: 12px 2.5px;
+  background-repeat: repeat-x;
+  animation: dash-flow-right 0.85s linear infinite;
+}
+
+.dashed-line-left {
+  background-image: linear-gradient(to right, #3b82f6 55%, transparent 45%);
+  background-size: 12px 2.5px;
+  background-repeat: repeat-x;
+  animation: dash-flow-left 0.85s linear infinite;
+}
+
+.dashed-line-down {
+  background-image: linear-gradient(to bottom, #3b82f6 55%, transparent 45%);
+  background-size: 2.5px 12px;
+  background-repeat: repeat-y;
+  animation: dash-flow-down 0.85s linear infinite;
+}
+
+.dark .dashed-line-right,
+.dark .dashed-line-left {
+  background-image: linear-gradient(to right, #60a5fa 55%, transparent 45%);
+}
+
+.dark .dashed-line-down {
+  background-image: linear-gradient(to bottom, #60a5fa 55%, transparent 45%);
+}
+
+/* =========================================================
+   4. 3D PERSPECTIVE & BALLOT BOX 3D
+   ========================================================= */
+.perspective-card-container {
+  perspective: 1400px;
+}
+
+.ballot-box-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateY(-10deg) rotateX(8deg);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    -14px 18px 28px -6px rgba(15, 23, 42, 0.16),
+    -6px 8px 12px -2px rgba(30, 58, 138, 0.14),
+    0 0 0 1px rgba(30, 58, 138, 0.1);
+}
+
+/* Sisi tebal balok kanan (Depth 3D Kanan) */
+.ballot-box-3d::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: -14px;
+  width: 14px;
+  height: calc(100% - 8px);
+  border-radius: 0 14px 14px 0;
+  transform-origin: left;
+  transform: rotateY(90deg);
+  background: linear-gradient(to right, rgba(30, 58, 138, 0.6), rgba(15, 23, 42, 0.75));
+  transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), right 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+/* Sisi tebal balok bawah (Depth 3D Bawah) */
+.ballot-box-3d::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 4px;
+  width: calc(100% - 8px);
+  height: 14px;
+  border-radius: 0 0 14px 14px;
+  transform-origin: top;
+  transform: rotateX(-90deg);
+  background: linear-gradient(to bottom, rgba(30, 58, 138, 0.7), rgba(15, 23, 42, 0.85));
+  transition: height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), bottom 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+.dark .ballot-box-3d {
+  box-shadow:
+    -16px 20px 32px -4px rgba(0, 0, 0, 0.8),
+    -6px 8px 16px -2px rgba(30, 58, 138, 0.35),
+    0 0 0 1px rgba(59, 130, 246, 0.25);
+}
+
+.dark .ballot-box-3d::before {
+  background: linear-gradient(to right, rgba(15, 23, 42, 0.95), rgba(30, 58, 138, 0.5));
+}
+
+.dark .ballot-box-3d::after {
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(30, 58, 138, 0.6));
+}
+
+.ballot-box-3d:hover {
+  transform: rotateY(-18deg) rotateX(13deg) translateY(-12px) translateZ(24px);
+  box-shadow:
+    -30px 40px 50px -8px rgba(15, 23, 42, 0.24),
+    -14px 20px 28px -4px rgba(30, 58, 138, 0.28),
+    0 0 25px rgba(59, 130, 246, 0.18);
+}
+
+.dark .ballot-box-3d:hover {
+  box-shadow:
+    -32px 42px 60px -6px rgba(0, 0, 0, 0.95),
+    -16px 22px 32px -2px rgba(30, 58, 138, 0.5),
+    0 0 35px rgba(59, 130, 246, 0.28);
+}
+
+.ballot-box-3d:hover::before {
+  width: 22px;
+  right: -22px;
+}
+
+.ballot-box-3d:hover::after {
+  height: 22px;
+  bottom: -22px;
+}
+
+.layer-float-sm {
+  transform: translateZ(12px);
+  transition: transform 0.4s ease;
+}
+
+.layer-float-md {
+  transform: translateZ(22px);
+  transition: transform 0.4s ease;
+}
+
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+}
+
+.card-3d:hover {
+  transform: rotateY(-6deg) rotateX(4deg) translateY(-6px);
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  h3 {
+    font-size: 1.1rem !important;
+    line-height: 1.5rem !important;
+  }
+
+  p,
+  span,
+  li,
+  button,
+  input,
+  textarea {
+    font-size: 0.875rem;
+  }
+
+  .ballot-box-3d {
+    transform: none !important;
+  }
+
+  .ballot-box-3d::before,
+  .ballot-box-3d::after {
+    display: none !important;
+  }
+}
+
+.glass-panel {
+  background: rgba(9, 9, 11, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:root:not(.dark) .glass-panel,
+html:not(.dark) .glass-panel {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 58, 138, 0.12);
+}
+
+@keyframes sams-float {
+
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  25% {
+    transform: translateY(-6px) translateX(3px);
+  }
+
+  50% {
+    transform: translateY(-2px) translateX(-3px);
+  }
+
+  75% {
+    transform: translateY(-7px) translateX(1px);
+  }
+}
+
+.animate-sams-float {
+  animation: sams-float 4.5s ease-in-out infinite;
 }
