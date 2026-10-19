@@ -22,7 +22,9 @@ export async function getPanitiaAdminList() {
           email,
           no_tlpn,
           role_id,
+          is_online,
           created_at,
+          update_at,
           roleadmin (id, role, roleakses)
         `)
         .order('created_at', { ascending: true }),

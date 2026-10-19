@@ -407,6 +407,36 @@ CREATE POLICY "public insert trafik_sosmed" ON trafik_sosmed FOR INSERT WITH CHE
 DROP POLICY IF EXISTS "auth all trafik_sosmed" ON trafik_sosmed;
 CREATE POLICY "auth all trafik_sosmed" ON trafik_sosmed FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+CREATE TABLE IF NOT EXISTS judul_absensi_panitia (
+  id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+  judul_absensi_panitia varchar(200) NOT NULL,
+  created_at date DEFAULT CURRENT_DATE
+);
+
+ALTER TABLE judul_absensi_panitia ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "auth all judul_absensi_panitia" ON judul_absensi_panitia;
+CREATE POLICY "auth all judul_absensi_panitia" ON judul_absensi_panitia FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE TABLE IF NOT EXISTS absensi_panitia (
+  id uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+  panitia_id uuid NOT NULL references panitia(id) on delete cascade, 
+  judul_absensi_panitia_id uuid NOT NULL references judul_absensi_panitia(id) on delete cascade, 
+  jenis_absensi varchar(100) not null with check (jenis_absensi in ('hadir', 'izin', 'sakit', 'alpha')),
+  keterlambatan varchar(255) not null with check (keterlambatan in ('terlambat', 'tepat_waktu')),
+  keterangan varchar(255),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE absensi_panitia ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "auth all absensi_panitia" ON absensi_panitia;
+CREATE POLICY "auth all absensi_panitia" ON absensi_panitia FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+ALTER TABLE absensi_panitia 
+  DROP CONSTRAINT absensi_panitia_keterlambatan_check;
+
+ALTER TABLE absensi_panitia 
+  ADD CONSTRAINT absensi_panitia_keterlambatan_check 
+  CHECK (keterlambatan IN ('terlambat', 'tepat_waktu', 'tidak hadir'));
 ```
 ### C. Struktur Folder Project Eksisting
 ```C:\Users\samba\OneDrive\Documents\WebKPU\web-kpu

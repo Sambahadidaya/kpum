@@ -12,13 +12,18 @@ import {
   Trash2,
   X,
   AlertCircle,
+  RefreshCw,
+  Users,
+  Clock,
 } from 'lucide-react';
+import { formatWaktuIndo } from '@/utils/dateUtils';
 
 export default function PanitiaAkunPage() {
   const [adminList, setAdminList] = useState([]);
   const [roleList, setRoleList] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorText, setErrorText] = useState('');
@@ -32,8 +37,10 @@ export default function PanitiaAkunPage() {
     role_id: '',
   });
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setRefreshing(true);
+
     const res = await getPanitiaAdminList();
     if (res.success) {
       setAdminList(res.data || []);
@@ -43,11 +50,21 @@ export default function PanitiaAkunPage() {
         setFormData((prev) => ({ ...prev, role_id: res.roles[0].id }));
       }
     }
-    setLoading(false);
+    if (!isSilent) setLoading(false);
+    else setRefreshing(false);
   };
 
   useEffect(() => {
-    loadData();
+    loadData(false);
+
+    // Polling live keaktifan admin setiap 4 detik saat halaman sedang dibuka
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        loadData(true);
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -72,7 +89,7 @@ export default function PanitiaAkunPage() {
         password: '',
         role_id: roleList[0]?.id || '',
       });
-      loadData();
+      loadData(false);
     } else {
       setErrorText(res.error || 'Gagal mendaftarkan akun panitia baru.');
     }
@@ -83,12 +100,16 @@ export default function PanitiaAkunPage() {
     if (confirm('Hapus akun panitia ini? Pengguna ini tidak akan bisa login lagi.')) {
       const res = await hapusAkunPanitia(adminId, authId);
       if (res.success) {
-        loadData();
+        loadData(false);
       } else {
         alert(res.error || 'Gagal menghapus akun panitia.');
       }
     }
   };
+
+  const totalAdmins = adminList.length;
+  const onlineCount = adminList.filter((a) => a.is_online).length;
+  const offlineCount = Math.max(0, totalAdmins - onlineCount);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto transition-colors">
@@ -104,20 +125,75 @@ export default function PanitiaAkunPage() {
             </span>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Daftarkan akun panitia KPU baru dengan autentikasi Supabase dan kelola peran hak akses.
+            Daftarkan akun panitia KPU baru dengan autentikasi Supabase dan pantau status aktif/offline panitia secara langsung.
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setErrorText('');
-            setModalOpen(true);
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Tambah Akun Panitia</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => loadData(true)}
+            disabled={refreshing}
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 text-xs font-semibold transition active:scale-95 cursor-pointer disabled:opacity-50"
+            title="Segarkan Data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setErrorText('');
+              setModalOpen(true);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Tambah Akun Panitia</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Statistik Ringkas Status Online/Offline */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between shadow-2xs">
+          <div className="space-y-0.5">
+            <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Total Akun Terdaftar</span>
+            <p className="text-lg font-black text-zinc-900 dark:text-zinc-100">{totalAdmins}</p>
+          </div>
+          <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 flex items-center justify-center">
+            <Users className="w-4 h-4" />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between shadow-2xs">
+          <div className="space-y-0.5">
+            <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Sedang Aktif (Online)</span>
+            <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+              <span>{onlineCount}</span>
+              <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800">
+                Online
+              </span>
+            </p>
+          </div>
+          <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between shadow-2xs">
+          <div className="space-y-0.5">
+            <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Tidak Aktif (Offline)</span>
+            <p className="text-lg font-black text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
+              <span>{offlineCount}</span>
+              <span className="text-[10px] font-semibold text-zinc-500 px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                Offline
+              </span>
+            </p>
+          </div>
+          <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-400 flex items-center justify-center">
+            <span className="w-3 h-3 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+          </div>
+        </div>
       </div>
 
       {/* Tabel Akun Panitia */}
@@ -134,6 +210,8 @@ export default function PanitiaAkunPage() {
               <thead className="bg-zinc-50 dark:bg-zinc-900/80 text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-800">
                 <tr>
                   <th className="py-3.5 px-5 font-semibold">Nama Panitia</th>
+                  <th className="py-3.5 px-4 font-semibold">Status</th>
+                  <th className="py-3.5 px-4 font-semibold">Terakhir Login</th>
                   <th className="py-3.5 px-4 font-semibold">NIM</th>
                   <th className="py-3.5 px-4 font-semibold">Email</th>
                   <th className="py-3.5 px-4 font-semibold">No. Telepon / WA</th>
@@ -157,6 +235,31 @@ export default function PanitiaAkunPage() {
                           <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                             Anda
                           </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {admin.is_online ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-850 shadow-2xs">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            Online
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
+                            <span className="w-2 h-2 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+                            Offline
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {admin.update_at ? (
+                          <div className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
+                            <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                            <span className="font-mono text-[11px]">
+                              {formatWaktuIndo(admin.update_at)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-zinc-400 text-xs italic">-</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 font-mono">{admin.nim}</td>

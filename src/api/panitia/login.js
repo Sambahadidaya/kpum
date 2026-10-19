@@ -52,7 +52,20 @@ export async function loginPanitia(nim, password) {
       return { success: false, error: 'Password salah. Silakan periksa kembali.' };
     }
 
-    // 3. Simpan session terenkripsi ke cookie HTTP-only
+    // 3. Update status online = true & update_at (terakhir login)
+    try {
+      await supabaseAdmin
+        .from('adminpanitia')
+        .update({
+          is_online: true,
+          update_at: new Date().toISOString(),
+        })
+        .eq('id', admin.id);
+    } catch (e) {
+      console.error('Failed to set online status and login time on login:', e);
+    }
+
+    // 4. Simpan session terenkripsi ke cookie HTTP-only
     await setPanitiaSession(admin, authData.user.id);
 
     return {

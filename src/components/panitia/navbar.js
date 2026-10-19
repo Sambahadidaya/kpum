@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { logoutPanitia } from '@/api/panitia/auth';
+import { hasPermission } from '@/lib/adminRoleData';
 import logoKpu from '@/aseets/logo.png';
 
 const MENU_GROUPS = [
@@ -38,58 +39,67 @@ const MENU_GROUPS = [
     id: 'dashboard',
     title: 'Dashboard',
     items: [
-      { name: 'Dashboard', href: '/panitia/dashboard', icon: LayoutDashboard },
-      { name: 'Manajemen Trafik', href: '/panitia/trafik', icon: Activity },
+      { name: 'Dashboard', href: '/panitia/dashboard', icon: LayoutDashboard, permission: 'dashboard' },
+      { name: 'Manajemen Trafik', href: '/panitia/trafik', icon: Activity, permission: 'trafik' },
     ],
   },
   {
     id: 'kandidat',
     title: 'Kandidat',
     items: [
-      { name: 'Manajemen Kandidat', href: '/panitia/kandidat', icon: Users },
-      { name: 'Manajemen Paslon', href: '/panitia/paslon', icon: Vote },
+      { name: 'Manajemen Kandidat', href: '/panitia/kandidat', icon: Users, permission: 'kandidat' },
+      { name: 'Manajemen Paslon', href: '/panitia/paslon', icon: Vote, permission: 'paslon' },
     ],
   },
   {
     id: 'dataMhs',
     title: 'Data Mhs',
     items: [
-      { name: 'Manajemen Data Mhs', href: '/panitia/mhs', icon: GraduationCap },
-      { name: 'Dashboard Data Mhs', href: '/panitia/mhs/dashboard', icon: BarChart3 },
+      { name: 'Manajemen Data Mhs', href: '/panitia/mhs', icon: GraduationCap, permission: 'mhs' },
+      { name: 'Dashboard Data Mhs', href: '/panitia/mhs/dashboard', icon: BarChart3, permission: 'mhs' },
     ],
   },
   {
     id: 'voting',
     title: 'Voting',
     items: [
-      { name: 'Dashboard Voting', href: '/panitia/voting', icon: PieChart },
-      { name: 'Manajemen Voting', href: '/panitia/voting/manajemen', icon: ClipboardList },
+      { name: 'Dashboard Voting', href: '/panitia/voting', icon: PieChart, permission: 'voting' },
+      { name: 'Manajemen Voting', href: '/panitia/voting/manajemen', icon: ClipboardList, permission: 'voting' },
     ],
   },
   {
     id: 'dataPanitia',
     title: 'Data Panitia',
     items: [
-      { name: 'Struktur Panitia', href: '/panitia/panitia', icon: UserCheck },
-      { name: 'Trafik Sosmed', href: '/panitia/panitia/trafik-sosmed', icon: BarChart3 },
+      { name: 'Struktur Panitia', href: '/panitia/panitia', icon: UserCheck, permission: 'panitia' },
+      { name: 'Trafik Sosmed', href: '/panitia/panitia/trafik-sosmed', icon: BarChart3, permission: 'trafik_sosmed' },
+    ],
+  },
+  {
+    id: 'sekretaris',
+    title: 'Sekretaris',
+    items: [
+      { name: 'Dashboard', href: '/panitia/sekretaris', icon: LayoutDashboard, permission: 'sekretaris' },
+      { name: 'Judul Absensi Panitia', href: '/panitia/sekretaris/judul-absensi', icon: ClipboardList, permission: 'sekretaris' },
+      { name: 'Absensi Panitia', href: '/panitia/sekretaris/absensi', icon: UserCheck, permission: 'sekretaris' },
     ],
   },
   {
     id: 'informasi',
     title: 'Informasi',
     items: [
-      { name: 'Manajemen Dokumentasi', href: '/panitia/dokumentasi', icon: FolderKanban },
-      { name: 'Panduan Pemilu', href: '/panitia/panduan', icon: BookOpen },
-      { name: 'Pesan Kontak', href: '/panitia/contact', icon: Mail },
-      { name: 'Jadwal Acara', href: '/panitia/jadwal', icon: CalendarDays },
+      { name: 'Manajemen Dokumentasi', href: '/panitia/dokumentasi', icon: FolderKanban, permission: 'dokumentasi' },
+      { name: 'Panduan Pemilu', href: '/panitia/panduan', icon: BookOpen, permission: 'panduan' },
+      { name: 'Pesan Kontak', href: '/panitia/contact', icon: Mail, permission: 'contact' },
+      { name: 'Jadwal Acara', href: '/panitia/jadwal', icon: CalendarDays, permission: 'jadwal' },
     ],
   },
   {
     id: 'setting',
     title: 'Setting',
     items: [
-      { name: 'Manajemen Akun', href: '/panitia/akun', icon: ShieldCheck, superAdminOnly: true },
-      { name: 'Manajemen Role Akses', href: '/panitia/roleakses', icon: KeyRound, superAdminOnly: true },
+      { name: 'Manajemen Akun', href: '/panitia/akun', icon: ShieldCheck, permission: 'akun', superAdminOnly: true },
+      { name: 'Manajemen Role Akses', href: '/panitia/roleakses', icon: KeyRound, permission: 'roleakses', superAdminOnly: true },
     ],
   },
 ];
@@ -110,6 +120,13 @@ export default function PanitiaNavbar({ currentAdmin, collapsed = false, toggleC
   };
 
   const isSuperAdmin = currentAdmin?.role === 'superAdmin';
+
+  const canAccess = (item) => {
+    if (isSuperAdmin) return true;
+    if (item.superAdminOnly) return false;
+    if (!item.permission) return true;
+    return hasPermission(currentAdmin?.role, item.permission, currentAdmin?.roleAkses);
+  };
 
   const handleLogout = async () => {
     if (confirm('Apakah Anda yakin ingin keluar dari panel panitia?')) {
@@ -268,7 +285,7 @@ export default function PanitiaNavbar({ currentAdmin, collapsed = false, toggleC
         {/* Navigation Items (Grouped UL - LI dengan Collapsible Accordion) */}
         <nav className="flex-1 px-2.5 py-2 space-y-3 overflow-y-auto">
           {MENU_GROUPS.map((group) => {
-            const visibleItems = group.items.filter((item) => !item.superAdminOnly || isSuperAdmin);
+            const visibleItems = group.items.filter(canAccess);
             if (visibleItems.length === 0) return null;
 
             const isGroupOpen = Boolean(openGroups[group.id]);
@@ -391,7 +408,7 @@ export default function PanitiaNavbar({ currentAdmin, collapsed = false, toggleC
 
             <nav className="flex-1 py-4 space-y-3 overflow-y-auto">
               {MENU_GROUPS.map((group) => {
-                const visibleItems = group.items.filter((item) => !item.superAdminOnly || isSuperAdmin);
+                const visibleItems = group.items.filter(canAccess);
                 if (visibleItems.length === 0) return null;
 
                 const isGroupOpen = Boolean(openGroups[group.id]);

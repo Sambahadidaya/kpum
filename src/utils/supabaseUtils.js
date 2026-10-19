@@ -91,7 +91,7 @@ export async function requirePanitiaPermission(requiredPermission) {
     throw new Error('Akses ditolak: Anda harus login terlebih dahulu.');
   }
 
-  if (requiredPermission && !hasPermission(session.role, requiredPermission)) {
+  if (requiredPermission && !hasPermission(session.role, requiredPermission, session.roleAkses)) {
     throw new Error('Akses ditolak: Anda tidak memiliki izin untuk tindakan ini.');
   }
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import PanitiaNavbar from '@/components/panitia/navbar';
+import AdminPresenceTracker from '@/components/panitia/AdminPresenceTracker';
 
 export default function PanitiaLayoutWrapper({ currentAdmin, children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -29,6 +30,9 @@ export default function PanitiaLayoutWrapper({ currentAdmin, children }) {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col transition-colors">
+      {/* Tracker Presence Online/Offline Admin */}
+      {currentAdmin && <AdminPresenceTracker />}
+
       {/* Navbar Panitia dengan Collapsible Sidebar & Mobile Fixed Topbar */}
       {currentAdmin && (
         <PanitiaNavbar
