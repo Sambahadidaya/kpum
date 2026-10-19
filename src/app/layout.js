@@ -8,7 +8,12 @@ export const metadata = {
   description: 'Portal Informasi Resmi Komisi Pemilihan Umum Mahasiswa (KPU) Pemilu Presiden dan Wakil Presiden BEM Politeknik LP3I.',
   keywords: ['KPU', 'Pemilu BEM', 'Politeknik LP3I', 'Presma', 'Wapresma', 'Mahasiswa'],
   authors: [{ name: 'KPU Mahasiswa Politeknik LP3I' }],
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }) {

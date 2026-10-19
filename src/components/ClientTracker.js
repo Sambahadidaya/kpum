@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { catatTrafikKunjungan } from '@/api/publlic/trafik';
 
-export default function ClientTracker() {
+function TrackerContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lastTrackedPath = useRef('');
@@ -33,3 +33,12 @@ export default function ClientTracker() {
 
   return null;
 }
+
+export default function ClientTracker() {
+  return (
+    <Suspense fallback={null}>
+      <TrackerContent />
+    </Suspense>
+  );
+}
+

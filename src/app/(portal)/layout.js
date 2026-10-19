@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import PublicNavbar from '@/components/public/navbar';
 import PublicFooter from '@/components/public/footer';
 import SamsAsisten from '@/components/SamsAsisten';
@@ -9,7 +10,9 @@ export default function PortalLayout({ children }) {
   return (
     <div className="relative min-h-screen flex flex-col pb-16 md:pb-0">
       <SiteBackground />
-      <ClientTracker />
+      <Suspense fallback={null}>
+        <ClientTracker />
+      </Suspense>
       <PublicNavbar />
 
       <main className="flex-1 flex flex-col">{children}</main>
