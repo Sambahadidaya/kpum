@@ -251,7 +251,7 @@ export default function BerandaPortalPage() {
                           Penyelenggara:
                         </span>
                         <span className="text-blue-700 dark:text-blue-400 font-bold">
-                          KPU Mahasiswa
+                          Panitia KPUM 2025/2026
                         </span>
                       </div>
                     </div>
