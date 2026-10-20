@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { loginPanitia } from '@/api/panitia/login';
+import { getFirstAccessibleRoute } from '@/lib/adminRoleData';
 import logoKpu from '@/aseets/logo.png';
 import {
   Lock,
@@ -30,7 +31,8 @@ export default function LoginPage() {
     try {
       const res = await loginPanitia(nim, password);
       if (res.success) {
-        router.push('/panitia/dashboard');
+        const targetRoute = getFirstAccessibleRoute(res.roleAkses, res.role);
+        router.push(targetRoute);
         router.refresh();
       } else {
         setErrorMsg(res.error || 'Login gagal. Periksa NIM dan password Anda.');

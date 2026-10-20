@@ -1,0 +1,2 @@
+saya ingin membuat file baru dicomponents yaitu untuk siteOpening dan siteOpening ini disimpannya dilayout biar bisa diakses oleh semua halaman. di halaman login tidak menggunakan siteOpening.
+buatkanlah siteOpening semodern mungkin yang ada transisi atau animasi fade in yang membesar lalu menghilang dan pakailah logo.pngnya dan saya ingin dibelakang logo itu ada elemen seperti border lingkaran atau gimanapun yang intinya ingin modern

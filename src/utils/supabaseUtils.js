@@ -29,7 +29,7 @@ export async function getPanitiaSession() {
     // Verifikasi validitas admin di database
     const { data: admin, error } = await supabaseAdmin
       .from('adminpanitia')
-      .select('id, nama, nim, email, no_tlpn, role_id, roleadmin (id, role, roleakses)')
+      .select('id, nama, nim, email, no_tlpn, role_id, roleadmin (id, role, roleakses, jenis)')
       .eq('id', decoded.adminId)
       .single();
 
@@ -45,6 +45,7 @@ export async function getPanitiaSession() {
       email: admin.email,
       role: admin.roleadmin?.role || 'adminPanitia',
       roleAkses: admin.roleadmin?.roleakses || '',
+      jenis: admin.roleadmin?.jenis || 'Editor',
     };
   } catch (error) {
     return null;
@@ -95,5 +96,16 @@ export async function requirePanitiaPermission(requiredPermission) {
     throw new Error('Akses ditolak: Anda tidak memiliki izin untuk tindakan ini.');
   }
 
+  return session;
+}
+
+/**
+ * Memastikan panitia memiliki hak akses sekaligus bertipe Editor (bukan Viewer)
+ */
+export async function requirePanitiaEditor(requiredPermission) {
+  const session = await requirePanitiaPermission(requiredPermission);
+  if (session.jenis === 'Viewer') {
+    throw new Error('Akses dibatasi: Role Anda adalah Viewer (hanya dapat melihat data, tidak dapat menambah/mengubah/menghapus).');
+  }
   return session;
 }

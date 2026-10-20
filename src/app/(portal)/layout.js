@@ -5,7 +5,6 @@ import SamsAsisten from '@/components/SamsAsisten';
 import ClientTracker from '@/components/ClientTracker';
 import SiteBackground from '@/components/SiteBackground';
 import MobileNavHint from '@/components/public/mobileNavHint';
-import AdminPresenceTracker from '@/components/panitia/AdminPresenceTracker';
 
 export default function PortalLayout({ children }) {
   return (
@@ -13,7 +12,6 @@ export default function PortalLayout({ children }) {
       <SiteBackground />
       <Suspense fallback={null}>
         <ClientTracker />
-        <AdminPresenceTracker />
       </Suspense>
       <PublicNavbar />
 

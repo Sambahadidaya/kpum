@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BgWaveDivider from '@/components/public/bgWaveDivider';
 import PaslonSlider from '@/components/public/PaslonSlider';
-import { getPublikPaslonList } from '@/api/publlic/paslon';
+import defaultImg from '@/aseets/default.jpg';
 import {
   Vote,
   User,
@@ -20,12 +20,102 @@ import {
   RotateCcw,
 } from 'lucide-react';
 
+const DUMMY_PASLON_LIST = [
+  {
+    id: 'dummy-paslon-1',
+    nomor_urut: 1,
+    slogan: 'Inovasi Bersama, Wujudkan Mahasiswa Berdaya Saing',
+    kandidat1: {
+      id: 'dummy-k1-1',
+      nama_kandidat: 'Ahmad Faiz Pratama',
+      nim_kandidat: '202301001',
+      prodi_kandidat: 'Manajemen Informatika',
+      fotodiri_kandidat: defaultImg.src,
+      posisi: 'Calon Presiden Mahasiswa',
+      detail_kandidat: {
+        visi: 'Mewujudkan BEM sebagai wadah kolaboratif, progresif, dan inklusif demi kemajuan mahasiswa.',
+        misi: '1. Mengembangkan potensi kepemimpinan mahasiswa.\n2. Memperkuat sinergi ormawa kampus.\n3. Mengawal aspirasi mahasiswa secara transparan.',
+      },
+    },
+    kandidat2: {
+      id: 'dummy-k2-1',
+      nama_kandidat: 'Siti Nurhaliza',
+      nim_kandidat: '202301002',
+      prodi_kandidat: 'Komputerisasi Akuntansi',
+      fotodiri_kandidat: defaultImg.src,
+      posisi: 'Calon Wakil Presiden Mahasiswa',
+      detail_kandidat: {
+        visi: 'Mewujudkan BEM sebagai wadah kolaboratif, progresif, dan inklusif demi kemajuan mahasiswa.',
+        misi: '1. Mengembangkan potensi kepemimpinan mahasiswa.\n2. Memperkuat sinergi ormawa kampus.\n3. Mengawal aspirasi mahasiswa secara transparan.',
+      },
+    },
+  },
+  {
+    id: 'dummy-paslon-2',
+    nomor_urut: 2,
+    slogan: 'Aksi Nyata untuk Kampus Berintegritas dan Berprestasi',
+    kandidat1: {
+      id: 'dummy-k1-2',
+      nama_kandidat: 'Bima Satria Yudha',
+      nim_kandidat: '202302003',
+      prodi_kandidat: 'Teknik Komputer',
+      fotodiri_kandidat: defaultImg.src,
+      posisi: 'Calon Presiden Mahasiswa',
+      detail_kandidat: {
+        visi: 'Menciptakan kampus yang dinamis, berprestasi, dan berintegritas tinggi.',
+        misi: '1. Menyelenggarakan program inkubasi karya mahasiswa.\n2. Optimalisasi advokasi hak-hak mahasiswa.\n3. Kolaborasi aktif dengan stakeholder eksternal.',
+      },
+    },
+    kandidat2: {
+      id: 'dummy-k2-2',
+      nama_kandidat: 'Dewi Anggraini',
+      nim_kandidat: '202302004',
+      prodi_kandidat: 'Administrasi Bisnis',
+      fotodiri_kandidat: defaultImg.src,
+      posisi: 'Calon Wakil Presiden Mahasiswa',
+      detail_kandidat: {
+        visi: 'Menciptakan kampus yang dinamis, berprestasi, dan berintegritas tinggi.',
+        misi: '1. Menyelenggarakan program inkubasi karya mahasiswa.\n2. Optimalisasi advokasi hak-hak mahasiswa.\n3. Kolaborasi aktif dengan stakeholder eksternal.',
+      },
+    },
+  },
+  {
+    id: 'dummy-paslon-3',
+    nomor_urut: 3,
+    slogan: 'Sinergi Harmonis, Mengabdi untuk Seluruh Civitas Akademika',
+    kandidat1: {
+      id: 'dummy-k1-3',
+      nama_kandidat: 'Chandra Wijaya',
+      nim_kandidat: '202303005',
+      prodi_kandidat: 'Manajemen Pemasaran',
+      fotodiri_kandidat: defaultImg.src,
+      posisi: 'Calon Presiden Mahasiswa',
+      detail_kandidat: {
+        visi: 'Menjadikan BEM sebagai pusat pelayanan aspirasi yang humanis dan solutif.',
+        misi: '1. Meningkatkan keterlibatan aktif mahasiswa dalam kegiatan kampus.\n2. Digitalisasi layanan aspirasi dan informasi.\n3. Menumbuhkan semangat wirausaha muda.',
+      },
+    },
+    kandidat2: {
+      id: 'dummy-k2-3',
+      nama_kandidat: 'Rina Kusuma Wardani',
+      nim_kandidat: '202303006',
+      prodi_kandidat: 'Hubungan Masyarakat',
+      fotodiri_kandidat: defaultImg.src,
+      posisi: 'Calon Wakil Presiden Mahasiswa',
+      detail_kandidat: {
+        visi: 'Menjadikan BEM sebagai pusat pelayanan aspirasi yang humanis dan solutif.',
+        misi: '1. Meningkatkan keterlibatan aktif mahasiswa dalam kegiatan kampus.\n2. Digitalisasi layanan aspirasi dan informasi.\n3. Menumbuhkan semangat wirausaha muda.',
+      },
+    },
+  },
+];
+
 export default function BilikSimulasiPage() {
   const router = useRouter();
 
   const [simSession, setSimSession] = useState(null);
-  const [paslonList, setPaslonList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [paslonList] = useState(DUMMY_PASLON_LIST);
+  const [loading] = useState(false);
   const [selectedPaslon, setSelectedPaslon] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [voteSuccess, setVoteSuccess] = useState(false);
@@ -52,19 +142,6 @@ export default function BilikSimulasiPage() {
       router.replace('/simulasi/login');
     }
   }, [router]);
-
-  // 2. Ambil daftar paslon resmi (read-only, tidak ada interaksi DB)
-  useEffect(() => {
-    async function loadPaslon() {
-      setLoading(true);
-      const res = await getPublikPaslonList();
-      if (res.success) {
-        setPaslonList(res.data || []);
-      }
-      setLoading(false);
-    }
-    loadPaslon();
-  }, []);
 
   const handleOpenConfirm = (paslon) => {
     setSelectedPaslon(paslon);

@@ -2,6 +2,7 @@ import './globals.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { ThemeProvider } from 'next-themes';
 import DynamicFavicon from '@/components/DynamicFavicon';
+import SiteOpening from '@/components/SiteOpening';
 
 export const metadata = {
   title: 'KPU Pemilu Mahasiswa - Politeknik LP3I',
@@ -29,7 +30,7 @@ export default function RootLayout({ children }) {
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
+          <SiteOpening>{children}</SiteOpening>
         </ThemeProvider>
       </body>
     </html>

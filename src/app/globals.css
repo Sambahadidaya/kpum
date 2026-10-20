@@ -206,6 +206,52 @@
   background-image: linear-gradient(to bottom, #60a5fa 55%, transparent 45%);
 }
 
+/* Pause animation on scroll or when out of viewport */
+.dashed-lines-paused .dashed-line-right,
+.dashed-lines-paused .dashed-line-left,
+.dashed-lines-paused .dashed-line-down {
+  animation-play-state: paused !important;
+}
+
+/* Opening Screen Rotations (Clockwise & Counter-Clockwise) */
+@keyframes opening-spin-cw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes opening-spin-ccw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-opening-spin-cw-1 {
+  animation: opening-spin-cw 9s linear infinite;
+}
+
+.animate-opening-spin-ccw-2 {
+  animation: opening-spin-ccw 11s linear infinite;
+}
+
+.animate-opening-spin-cw-3 {
+  animation: opening-spin-cw 7s linear infinite;
+}
+
+.animate-opening-spin-ccw-4 {
+  animation: opening-spin-ccw 8s linear infinite;
+}
+
+.animate-opening-spin-dots {
+  animation: opening-spin-cw 5s linear infinite;
+}
+
 /* =========================================================
    4. 3D PERSPECTIVE & BALLOT BOX 3D
    ========================================================= */

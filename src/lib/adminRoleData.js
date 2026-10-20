@@ -151,6 +151,50 @@ export const ROLE_PERMISSIONS = {
   ],
 };
 
+export const PERMISSION_ROUTE_MAP = {
+  dashboard: '/panitia/dashboard',
+  trafik: '/panitia/trafik',
+  kandidat: '/panitia/kandidat',
+  paslon: '/panitia/paslon',
+  mhs: '/panitia/mhs',
+  voting: '/panitia/voting',
+  panitia: '/panitia/panitia',
+  trafik_sosmed: '/panitia/panitia/trafik-sosmed',
+  sekretaris: '/panitia/sekretaris',
+  dokumentasi: '/panitia/dokumentasi',
+  jadwal: '/panitia/jadwal',
+  panduan: '/panitia/panduan',
+  contact: '/panitia/contact',
+  akun: '/panitia/akun',
+  roleakses: '/panitia/roleakses',
+};
+
+export function getFirstAccessibleRoute(roleAkses = '', role = '') {
+  if (roleAkses) {
+    const perms = roleAkses
+      .split(',')
+      .map((p) => p.trim().toLowerCase())
+      .filter(Boolean);
+
+    for (const perm of perms) {
+      if (perm === 'all') {
+        return '/panitia/dashboard';
+      }
+      if (PERMISSION_ROUTE_MAP[perm]) {
+        return PERMISSION_ROUTE_MAP[perm];
+      }
+    }
+  }
+
+  // Jika superAdmin default ke dashboard
+  if (role === 'superAdmin' || role === ROLES.SUPER_ADMIN) {
+    return '/panitia/dashboard';
+  }
+
+  // Fallback default
+  return '/panitia/dashboard';
+}
+
 export function hasPermission(roleName, requiredPermission, roleAkses = null) {
   if (!roleName) return false;
   if (roleName === ROLES.SUPER_ADMIN || roleName === 'superAdmin') return true;

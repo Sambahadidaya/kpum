@@ -24,9 +24,6 @@ export async function getPublikPaslonList() {
           is_eliminated,
           detail_kandidat (
             id,
-            notlpn_wa_kandidat,
-            emailplb_kandidat,
-            cv_portofolio_kandidat,
             visi,
             misi
           )
@@ -41,9 +38,6 @@ export async function getPublikPaslonList() {
           is_eliminated,
           detail_kandidat (
             id,
-            notlpn_wa_kandidat,
-            emailplb_kandidat,
-            cv_portofolio_kandidat,
             visi,
             misi
           )

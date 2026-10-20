@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Compass, X, ArrowDown } from 'lucide-react';
+import { TIMING_CONFIG } from '@/lib/timingConfig';
 
 export default function MobileNavHint() {
   const [showHint, setShowHint] = useState(false);
@@ -10,10 +11,10 @@ export default function MobileNavHint() {
     try {
       const seen = sessionStorage.getItem('kpu_mobile_nav_hint_seen');
       if (!seen) {
-        // Tampilkan delay sedikit agar transisi masuk terasa halus setelah halaman ter-load
+        // Tampilkan dengan delay agar muncul setelah SiteOpening selesai
         const timer = setTimeout(() => {
           setShowHint(true);
-        }, 600);
+        }, TIMING_CONFIG.MOBILE_NAV_HINT_DELAY);
         return () => clearTimeout(timer);
       }
     } catch (e) {
@@ -35,7 +36,7 @@ export default function MobileNavHint() {
   return (
     <aside
       aria-label="Petunjuk Navigasi Mobile"
-      className="md:hidden fixed bottom-20 left-4 right-4 z-40 max-w-sm mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-auto"
+      className="md:hidden fixed bottom-20 left-4 right-4 z-40 max-w-sm mx-auto animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-400 ease-out pointer-events-auto"
     >
       <div className="relative p-3.5 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-[0_12px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_12px_30px_rgba(0,0,0,0.6)] space-y-2">
         {/* Header Hint */}

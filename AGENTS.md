@@ -437,6 +437,26 @@ ALTER TABLE absensi_panitia
 ALTER TABLE absensi_panitia 
   ADD CONSTRAINT absensi_panitia_keterlambatan_check 
   CHECK (keterlambatan IN ('terlambat', 'tepat_waktu', 'tidak hadir'));
+
+CREATE TABLE IF NOT EXISTS jadwal_voting (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  waktu_mulai TIMESTAMP WITH TIME ZONE NOT NULL,
+  waktu_berakhir TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE jadwal_voting ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "public read jadwal_voting" ON jadwal_voting;
+CREATE POLICY "public read jadwal_voting" ON jadwal_voting 
+  FOR SELECT TO public USING (true);
+DROP POLICY IF EXISTS "auth all jadwal_voting" ON jadwal_voting;
+CREATE POLICY "auth all jadwal_voting" ON jadwal_voting 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+
+alter table mhs add column kelas varchar(50) check (kelas in ('Reg','NonReg','Manaj','Dosen'));
+
+alter table roleadmin add column jenis varchar(50) default 'Editor' check (jenis in ('Viewer','Editor')) ;
 ```
 ### C. Struktur Folder Project Eksisting
 ```C:\Users\samba\OneDrive\Documents\WebKPU\web-kpu

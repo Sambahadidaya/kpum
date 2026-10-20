@@ -17,7 +17,7 @@ export async function getPanitiaRoleAksesList() {
 
     const { data, error } = await supabaseAdmin
       .from('roleadmin')
-      .select('id, role, roleakses, created_at, update_at')
+      .select('id, role, roleakses, jenis, created_at, update_at')
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -44,6 +44,7 @@ export async function simpanRoleAkses(payload) {
     const id = payload.id;
     const roleName = sanitizeText(payload.role || '').trim();
     const roleAkses = sanitizeText(payload.roleakses || payload.roleAkses || '').trim();
+    const jenis = payload.jenis === 'Viewer' ? 'Viewer' : 'Editor';
 
     if (!roleName) {
       return { success: false, error: 'Nama role wajib diisi.' };
@@ -56,6 +57,7 @@ export async function simpanRoleAkses(payload) {
         .update({
           role: roleName,
           roleakses: roleAkses,
+          jenis: jenis,
           update_at: new Date().toISOString(),
         })
         .eq('id', id);
@@ -68,6 +70,7 @@ export async function simpanRoleAkses(payload) {
         .insert({
           role: roleName,
           roleakses: roleAkses,
+          jenis: jenis,
         });
 
       if (error) return { success: false, error: error.message };

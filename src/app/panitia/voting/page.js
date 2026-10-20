@@ -45,23 +45,71 @@ ChartJS.register(
   Legend
 );
 
+const VOTING_CACHE_KEY = 'kpu_panitia_voting_cache';
+
 export default function DashboardVotingPanitiaPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastRefreshed, setLastRefreshed] = useState(null);
 
-  const loadData = async () => {
+  const loadData = async (forceRefresh = false) => {
     setLoading(true);
+
+    if (!forceRefresh) {
+      try {
+        const cached = localStorage.getItem(VOTING_CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed?.stats) {
+            setStats(parsed.stats);
+            setLastRefreshed(new Date(parsed.time || Date.now()));
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
     const res = await getVotingDashboardStats();
     if (res.success) {
       setStats(res.stats);
-      setLastRefreshed(new Date());
+      const now = new Date();
+      setLastRefreshed(now);
+      try {
+        localStorage.setItem(
+          VOTING_CACHE_KEY,
+          JSON.stringify({ stats: res.stats, time: now.toISOString() })
+        );
+      } catch (e) {}
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    loadData();
+    loadData(false);
+
+    const clearCache = () => {
+      try {
+        localStorage.removeItem(VOTING_CACHE_KEY);
+      } catch (e) {}
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') {
+        clearCache();
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', clearCache);
+    window.addEventListener('beforeunload', clearCache);
+
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', clearCache);
+      window.removeEventListener('beforeunload', clearCache);
+      clearCache();
+    };
   }, []);
 
   // Urutkan peringkat paslon berdasarkan total suara masuk
@@ -233,7 +281,7 @@ export default function DashboardVotingPanitiaPage() {
           )}
           <button
             type="button"
-            onClick={loadData}
+            onClick={() => loadData(true)}
             title="Perbarui Hasil Suara"
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
           >

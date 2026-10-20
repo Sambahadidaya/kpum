@@ -13,8 +13,8 @@ export default function VotingLandingPage() {
       {/* Hero Header Section */}
       <div className="relative pt-10 sm:pt-16 pb-0 bg-blue-50/60 dark:bg-[#0b0f19]">
         <div className="max-w-4xl mx-auto text-center space-y-3 px-4 sm:px-6 lg:px-8 pb-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-100/70 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-xs font-semibold">
-            <Vote className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-100/60 dark:bg-zinc-800/60 border border-blue-200/80 dark:border-blue-900/60 text-zinc-600 dark:text-zinc-400 text-xs font-semibold">
+            <Vote className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
             <span>Bilik Suara Elektronik Resmi (E-Voting)</span>
           </div>
 

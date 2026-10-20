@@ -64,6 +64,7 @@ const MENU_GROUPS = [
     title: 'Voting',
     items: [
       { name: 'Dashboard Voting', href: '/panitia/voting', icon: PieChart, permission: 'voting' },
+      { name: 'Jadwal Voting', href: '/panitia/voting/jadwal', icon: CalendarDays, permission: 'voting' },
       { name: 'Manajemen Voting', href: '/panitia/voting/manajemen', icon: ClipboardList, permission: 'voting' },
     ],
   },
@@ -150,7 +151,11 @@ export default function PanitiaNavbar({ currentAdmin, collapsed = false, toggleC
   return (
     <>
       {/* Top Banner Bar Panitia (Desktop Only) */}
-      <div className="hidden lg:flex w-full bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 px-6 py-2.5 items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 transition-colors z-20">
+      <div
+        className={`hidden lg:flex w-full bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 py-2.5 pr-6 items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 transition-all duration-300 z-20 ${
+          collapsed ? 'pl-24' : 'pl-72'
+        }`}
+      >
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">Panel Panitia KPU Mahasiswa</span>

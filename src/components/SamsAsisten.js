@@ -5,6 +5,7 @@ import { Bot, X, Send, RefreshCw, HelpCircle, ChevronDown, Move, Check } from 'l
 import ReactMarkdown from 'react-markdown';
 import { chatDenganSamsAsisten } from '@/api/openai/route';
 import { KPU_FAQ_DATA } from '@/data/faqDataAi';
+import { TIMING_CONFIG } from '@/lib/timingConfig';
 
 const INITIAL_MESSAGE = {
   role: 'assistant',
@@ -34,12 +35,15 @@ export default function SamsAsisten() {
   const clickTimerRef = useRef(null);
   const holdTimerRef = useRef(null);
 
-  // Inisialisasi notifikasi dari sessionStorage
+  // Inisialisasi notifikasi dari sessionStorage dengan delay berantai
   useEffect(() => {
     try {
       const dismissed = sessionStorage.getItem('sams_notif_dismissed');
       if (!dismissed) {
-        setShowNotif(true);
+        const timer = setTimeout(() => {
+          setShowNotif(true);
+        }, TIMING_CONFIG.SAMS_NOTIF_DELAY);
+        return () => clearTimeout(timer);
       }
     } catch (e) {
       // ignore
@@ -246,7 +250,7 @@ export default function SamsAsisten() {
         <div className="relative flex items-center">
           {/* Div Notifikasi Bubble (Menempel di samping icon) */}
           {showNotif && (
-            <div className="absolute right-15 bottom-0 flex items-center gap-2 pl-3.5 pr-2 py-2 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-blue-200/90 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xl whitespace-nowrap animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="absolute right-15 bottom-0 flex items-center gap-2 pl-3.5 pr-2 py-2 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-blue-200/90 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xl whitespace-nowrap animate-in fade-in zoom-in-90 slide-in-from-right-3 duration-400 ease-out">
               <div className="flex flex-col text-left">
                 <span className="text-xs font-bold leading-tight text-blue-950 dark:text-zinc-100">
                   Tanya Sams Asisten

@@ -72,6 +72,7 @@ export async function loginPanitia(nim, password) {
       success: true,
       message: 'Login berhasil!',
       role: admin.roleadmin?.role || 'adminPanitia',
+      roleAkses: admin.roleadmin?.roleakses || '',
       nama: admin.nama,
     };
   } catch (error) {

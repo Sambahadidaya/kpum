@@ -8,6 +8,7 @@ import BgWaveDivider from '@/components/public/bgWaveDivider';
 import PaslonSlider from '@/components/public/PaslonSlider';
 import { getPublikPaslonList } from '@/api/publlic/paslon';
 import { submitSuaraVoting, checkMhsVoted } from '@/api/publlic/voting';
+import { getStatusJadwalVoting } from '@/api/publlic/jadwalVoting';
 import {
   Vote,
   User,
@@ -19,6 +20,9 @@ import {
   ShieldCheck,
   ChevronRight,
   Info,
+  Timer,
+  Clock,
+  Lock,
 } from 'lucide-react';
 
 export default function BilikVotingPage() {
@@ -34,7 +38,22 @@ export default function BilikVotingPage() {
   const [successInfo, setSuccessInfo] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // 1. Cek session login pemilih
+  // State Validasi Jadwal Voting
+  const [jadwalStatus, setJadwalStatus] = useState('berlangsung');
+  const [countdownSeconds, setCountdownSeconds] = useState(0);
+  const [scheduleExpiredWarning, setScheduleExpiredWarning] = useState(false);
+
+  // Format detik countdown
+  const formatCountdown = (totalSeconds) => {
+    if (totalSeconds <= 0) return '00:00:00';
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  };
+
+  // 1. Cek session login pemilih & validasi jadwal voting aktif
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem('kpu_mhs_session');
@@ -52,7 +71,7 @@ export default function BilikVotingPage() {
 
       setMhsSession(parsed);
 
-      // Cek ke server apakah pemilih ini sebenarnya sudah pernah vote
+      // A. Cek ke server apakah pemilih ini sebenarnya sudah pernah vote
       checkMhsVoted(parsed.id).then((res) => {
         if (res.voted) {
           sessionStorage.removeItem('kpu_mhs_session');
@@ -60,6 +79,40 @@ export default function BilikVotingPage() {
           router.replace('/voting/login');
         }
       });
+
+      // B. Cek ke server apakah jadwal voting masih aktif / berlangsung
+      const verifySchedule = async () => {
+        try {
+          const res = await getStatusJadwalVoting();
+          if (!res.success || res.status !== 'berlangsung') {
+            sessionStorage.removeItem('kpu_mhs_session');
+            setScheduleExpiredWarning(true);
+            setTimeout(() => {
+              router.replace('/voting/login');
+            }, 3000);
+            return;
+          }
+          setJadwalStatus(res.status);
+          setCountdownSeconds(res.sisaWaktuDetik || 0);
+        } catch (e) {
+          // Abaikan error jaringan sementara
+        }
+      };
+
+      verifySchedule();
+
+      // Polling sinkronisasi jadwal setiap 30 detik
+      const scheduleInterval = setInterval(verifySchedule, 30000);
+
+      // Ticker countdown 1 detik — hanya mendekremen, TIDAK memanggil async di dalam updater
+      const tickInterval = setInterval(() => {
+        setCountdownSeconds((prev) => (prev <= 0 ? 0 : prev - 1));
+      }, 1000);
+
+      return () => {
+        clearInterval(scheduleInterval);
+        clearInterval(tickInterval);
+      };
     } catch (e) {
       router.replace('/voting/login');
     }
@@ -104,6 +157,13 @@ export default function BilikVotingPage() {
       });
 
       if (!res.success) {
+        if (res.votingNotActive) {
+          sessionStorage.removeItem('kpu_mhs_session');
+          setConfirmModalOpen(false);
+          setScheduleExpiredWarning(true);
+          setVotingInProgress(false);
+          return;
+        }
         setErrorMsg(res.error || 'Gagal menyimpan suara.');
         setVotingInProgress(false);
         return;
@@ -191,7 +251,7 @@ export default function BilikVotingPage() {
       {/* Hero Header Bilik Suara */}
       <div className="relative pt-8 sm:pt-14 pb-0 bg-blue-50/60 dark:bg-[#0b0f19]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-4">
-          {/* Bar Info Pemilih */}
+          {/* Bar Info Pemilih & Timer Jadwal */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-white/90 dark:bg-zinc-900/90 border border-zinc-200/90 dark:border-zinc-800 backdrop-blur-md shadow-xs">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center shrink-0">
@@ -207,13 +267,21 @@ export default function BilikVotingPage() {
               </div>
             </div>
 
-            <button
-              onClick={handleKeluarBilik}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border border-zinc-200 dark:border-zinc-800 transition cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Keluar Bilik</span>
-            </button>
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              {/* Badge Hitung Mundur Sisa Waktu Bilik Suara */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-xs font-mono font-bold text-zinc-800 dark:text-zinc-200">
+                <Timer className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
+                <span>Sisa: {formatCountdown(countdownSeconds)}</span>
+              </div>
+
+              <button
+                onClick={handleKeluarBilik}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border border-zinc-200 dark:border-zinc-800 transition cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Keluar Bilik</span>
+              </button>
+            </div>
           </div>
 
           <div className="text-center space-y-2 pt-2">
@@ -334,6 +402,39 @@ export default function BilikVotingPage() {
                     <span>Ya, Konfirmasi Suara</span>
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Peringatan: Waktu Voting Telah Selesai / Ditutup */}
+      {scheduleExpiredWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl text-center">
+            <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 mx-auto flex items-center justify-center">
+              <Lock className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                Waktu Pemungutan Suara Telah Berakhir
+              </h3>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Bilik suara resmi ditutup oleh Panitia KPU Mahasiswa. Anda akan dialihkan kembali ke halaman awal...
+              </p>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  sessionStorage.removeItem('kpu_mhs_session');
+                  router.replace('/voting/login');
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold transition active:scale-95 cursor-pointer"
+              >
+                Kembali ke Halaman Login
               </button>
             </div>
           </div>

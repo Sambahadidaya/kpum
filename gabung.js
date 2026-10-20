@@ -7,6 +7,7 @@ const OUTPUT = "./output/project-context3.md";
 const IGNORE = [
     "node_modules",
     ".git",
+    "log",
     ".next",
     "dist",
     "build",

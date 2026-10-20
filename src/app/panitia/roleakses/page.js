@@ -16,6 +16,7 @@ import {
   AlertCircle,
   ShieldCheck,
   Check,
+  CheckCircle2,
   CheckSquare,
   Square,
   Sparkles,
@@ -34,6 +35,7 @@ export default function PanitiaRoleAksesPage() {
   const [formData, setFormData] = useState({
     id: null,
     role: '',
+    jenis: 'Editor', // 'Editor' | 'Viewer'
     selectedPermissions: [],
   });
 
@@ -78,12 +80,14 @@ export default function PanitiaRoleAksesPage() {
       setFormData({
         id: roleItem.id,
         role: roleItem.role || '',
+        jenis: roleItem.jenis || 'Editor',
         selectedPermissions: perms,
       });
     } else {
       setFormData({
         id: null,
         role: '',
+        jenis: 'Editor',
         selectedPermissions: [
           'dashboard',
           'trafik',
@@ -136,6 +140,7 @@ export default function PanitiaRoleAksesPage() {
     const payload = {
       id: formData.id,
       role: formData.role,
+      jenis: formData.jenis || 'Editor',
       roleakses: formData.selectedPermissions.join(','),
     };
 
@@ -246,9 +251,20 @@ export default function PanitiaRoleAksesPage() {
                         <KeyRound className="w-4 h-4" />
                       </div>
                       <div>
-                        <h3 className="text-base font-extrabold text-zinc-900 dark:text-zinc-100">
-                          {r.role}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-extrabold text-zinc-900 dark:text-zinc-100">
+                            {r.role}
+                          </h3>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              r.jenis === 'Viewer'
+                                ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-300 dark:border-zinc-700'
+                                : 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-zinc-900 dark:border-zinc-100'
+                            }`}
+                          >
+                            {r.jenis === 'Viewer' ? 'Viewer' : 'Editor'}
+                          </span>
+                        </div>
                         <span className="text-[10px] text-zinc-500 font-mono">
                           ID: {r.id.slice(0, 8)}...
                         </span>
@@ -365,6 +381,50 @@ export default function PanitiaRoleAksesPage() {
                   disabled={formData.role === 'superAdmin'}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 focus:outline-hidden focus:border-zinc-500"
                 />
+              </div>
+
+              {/* Pilihan Tipe Role: Editor vs Viewer */}
+              <div className="space-y-1.5 pt-1">
+                <label className="font-semibold text-zinc-700 dark:text-zinc-300">
+                  Tipe Akses Role *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, jenis: 'Editor' }))}
+                    className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
+                      formData.jenis === 'Editor'
+                        ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950 shadow-xs'
+                        : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
+                    }`}
+                  >
+                    <div className="font-bold text-xs flex items-center justify-between">
+                      <span>Editor (Penuh)</span>
+                      {formData.jenis === 'Editor' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                    </div>
+                    <p className={`text-[10px] mt-1 leading-snug ${formData.jenis === 'Editor' ? 'opacity-85' : 'text-zinc-500'}`}>
+                      Dapat mengelola, menambah, mengedit, dan menghapus data pada modul yang diizinkan.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, jenis: 'Viewer' }))}
+                    className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
+                      formData.jenis === 'Viewer'
+                        ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950 shadow-xs'
+                        : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
+                    }`}
+                  >
+                    <div className="font-bold text-xs flex items-center justify-between">
+                      <span>Viewer (Hanya Lihat)</span>
+                      {formData.jenis === 'Viewer' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                    </div>
+                    <p className={`text-[10px] mt-1 leading-snug ${formData.jenis === 'Viewer' ? 'opacity-85' : 'text-zinc-500'}`}>
+                      Hanya dapat melihat (view only) data pada modul yang diizinkan tanpa aksi edit/hapus.
+                    </p>
+                  </button>
+                </div>
               </div>
 
               {/* Action Toolbar Pemilihan Modul */}

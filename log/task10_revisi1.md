@@ -1,0 +1,1 @@
+fokus ke logika roleakses panitia. saya ingin pada saat admin login itu ketika sudah login kan itu akan diredistkan ke halaman panitianya, nah saya ingin halaman panitianya itu pada halaman pertama yang sesuai aksesnya jadi jangan selalu ke halaman /panitia/dashboard tapi ke halaman pertama yang pada roleakses itu yang diatur lewat database.

@@ -33,9 +33,9 @@ export function proxyMiddleware(request) {
     }
   }
 
-  // Jika sudah login dan membuka /panitia/login, alihkan ke /panitia/dashboard
+  // Jika sudah login dan membuka /panitia/login, alihkan ke root /panitia
   if (pathname === '/panitia/login' && isLoggedIn) {
-    return NextResponse.redirect(new URL('/panitia/dashboard', request.url));
+    return NextResponse.redirect(new URL('/panitia', request.url));
   }
 
   return NextResponse.next();

@@ -17,6 +17,45 @@ export async function loginVotingMhs({ nim, kode_voting }) {
       return { success: false, error: 'NIM dan Kode Voting wajib diisi.' };
     }
 
+    // 0. Keamanan Berlapis: Verifikasi jadwal voting di server (anti-cheat jam lokal & VPN)
+    const { data: jadwalList, error: jadwalError } = await supabaseAdmin
+      .from('jadwal_voting')
+      .select('waktu_mulai, waktu_berakhir')
+      .order('waktu_mulai', { ascending: false })
+      .limit(1);
+
+    if (jadwalError) {
+      return { success: false, error: 'Gagal memverifikasi jadwal voting resmi.' };
+    }
+
+    if (!jadwalList || jadwalList.length === 0) {
+      return {
+        success: false,
+        error: 'Akses ditolak: Jadwal pemungutan suara belum dibuka oleh Panitia KPU.',
+        votingNotActive: true,
+      };
+    }
+
+    const nowTs = Date.now();
+    const startTs = new Date(jadwalList[0].waktu_mulai).getTime();
+    const endTs = new Date(jadwalList[0].waktu_berakhir).getTime();
+
+    if (nowTs < startTs) {
+      return {
+        success: false,
+        error: 'Akses ditolak: Pemungutan suara belum dimulai. Silakan tunggu jadwal resmi dibuka.',
+        votingNotActive: true,
+      };
+    }
+
+    if (nowTs > endTs) {
+      return {
+        success: false,
+        error: 'Akses ditolak: Waktu pemungutan suara telah berakhir.',
+        votingNotActive: true,
+      };
+    }
+
     // 1. Cari data mahasiswa di tabel mhs berdasarkan NIM
     const { data: mhsList, error: mhsError } = await supabaseAdmin
       .from('mhs')
@@ -105,6 +144,45 @@ export async function submitSuaraVoting({ mhsId, paslonId }) {
   try {
     if (!mhsId || !paslonId) {
       return { success: false, error: 'Data pemilih atau pasangan calon tidak valid.' };
+    }
+
+    // 0. Validasi Jadwal Voting Resmi di Server (Anti-cheat bypass jadwal)
+    const { data: jadwalList, error: jadwalError } = await supabaseAdmin
+      .from('jadwal_voting')
+      .select('waktu_mulai, waktu_berakhir')
+      .order('waktu_mulai', { ascending: false })
+      .limit(1);
+
+    if (jadwalError) {
+      return { success: false, error: 'Gagal memverifikasi jadwal voting resmi di server.' };
+    }
+
+    if (!jadwalList || jadwalList.length === 0) {
+      return {
+        success: false,
+        error: 'Pemungutan suara belum dibuka oleh Panitia KPU.',
+        votingNotActive: true,
+      };
+    }
+
+    const nowTs = Date.now();
+    const startTs = new Date(jadwalList[0].waktu_mulai).getTime();
+    const endTs = new Date(jadwalList[0].waktu_berakhir).getTime();
+
+    if (nowTs < startTs) {
+      return {
+        success: false,
+        error: 'Pemungutan suara belum dimulai. Silakan tunggu jadwal resmi dibuka.',
+        votingNotActive: true,
+      };
+    }
+
+    if (nowTs > endTs) {
+      return {
+        success: false,
+        error: 'Waktu pemungutan suara telah berakhir. Bilik suara sudah ditutup.',
+        votingNotActive: true,
+      };
     }
 
     // 1. Verifikasi kembali apakah mahasiswa valid

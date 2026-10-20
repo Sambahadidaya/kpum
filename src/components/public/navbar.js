@@ -70,7 +70,7 @@ const MOBILE_NAV_ITEMS = [
     subItems: [
       {
         name: 'E-Voting Resmi',
-        href: '/voting/login',
+        href: '/voting',
         icon: Vote,
         desc: 'Bilik suara resmi dengan kode voting',
       },
@@ -186,8 +186,8 @@ export default function PublicNavbar() {
                   key={link.href}
                   href={link.href}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${isActive
-                      ? 'bg-blue-700 text-white shadow-sm dark:bg-blue-600 dark:text-white'
-                      : 'text-zinc-600 dark:text-zinc-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-zinc-900'
+                    ? 'bg-blue-700 text-white shadow-sm dark:bg-blue-600 dark:text-white'
+                    : 'text-zinc-600 dark:text-zinc-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-zinc-900'
                     }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -248,15 +248,15 @@ export default function PublicNavbar() {
                       href={sub.href}
                       onClick={() => setOpenDropdownId(null)}
                       className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${isSubActive
-                          ? 'bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300'
-                          : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                        ? 'bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300'
+                        : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
                         }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isSubActive
-                              ? 'bg-blue-600 text-white shadow-xs'
-                              : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
                             }`}
                         >
                           <SubIcon className="w-4 h-4" />

@@ -20,9 +20,6 @@ export async function getPublikKandidat() {
         created_at,
         detail_kandidat (
           id,
-          notlpn_wa_kandidat,
-          emailplb_kandidat,
-          cv_portofolio_kandidat,
           visi,
           misi
         )
