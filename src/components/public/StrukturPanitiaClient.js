@@ -10,8 +10,10 @@ import {
   Filter,
   Users,
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 function PanitiaJabatanRow({ jabatanName, members, onEnlarge }) {
+  const { t } = useTranslation();
   const scrollRef = useRef(null);
 
   const scroll = (direction) => {
@@ -39,7 +41,7 @@ function PanitiaJabatanRow({ jabatanName, members, onEnlarge }) {
               {jabatanName}
             </h2>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
-              {members.length} Anggota Terdaftar
+              {members.length} {t('panitia.members_count', 'Anggota Terdaftar')}
             </p>
           </div>
         </div>

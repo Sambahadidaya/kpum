@@ -6,9 +6,11 @@ import { usePathname } from 'next/navigation';
 import { MessageSquare, ArrowRight, ChevronRight } from 'lucide-react';
 import logoKpu from '@/aseets/logo.png';
 import { NAV_LINKS } from './navbar';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function PublicFooter() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <footer className="w-full bg-slate-50/90 dark:bg-black border-t border-blue-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 py-12 px-4 sm:px-6 z-20 transition-colors">
@@ -27,16 +29,19 @@ export default function PublicFooter() {
             </div>
             <div>
               <h3 className="text-blue-950 dark:text-zinc-100 font-extrabold text-sm tracking-wide">
-                KOMISI PEMILIHAN UMUM MAHASISWA
+                {t('footer.brand_title', 'KOMISI PEMILIHAN UMUM MAHASISWA')}
               </h3>
               <p className="text-[11px] text-blue-700 dark:text-blue-400 font-semibold">
-                Politeknik LP3I
+                {t('footer.brand_sub', 'Politeknik LP3I')}
               </p>
             </div>
           </div>
 
           <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md">
-            Penyelenggara resmi Pemilihan Umum Raya Presiden & Wakil Presiden Mahasiswa Badan Eksekutif Mahasiswa (BEM) Politeknik LP3I yang berasaskan langsung, umum, bebas, rahasia, jujur, dan adil demi kepemimpinan mahasiswa yang berintegritas.
+            {t(
+              'footer.desc',
+              'Penyelenggara resmi Pemilihan Umum Raya Presiden & Wakil Presiden Mahasiswa Badan Eksekutif Mahasiswa (BEM) Politeknik LP3I yang berasaskan langsung, umum, bebas, rahasia, jujur, dan adil demi kepemimpinan mahasiswa yang berintegritas.'
+            )}
           </p>
 
           {/* Social Media Links */}
@@ -80,15 +85,16 @@ export default function PublicFooter() {
           </div>
         </div>
 
-        {/* Kolom 2: Tautan Navigasi (Span 4) - Dibagi Menjadi 2 Kolom Link */}
+        {/* Kolom 2: Tautan Navigasi */}
         <div className="space-y-3 md:col-span-4">
           <h4 className="text-blue-950 dark:text-zinc-100 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
             <span className="w-1.5 h-3 bg-blue-700 dark:bg-blue-400 rounded-full" />
-            Tautan Navigasi
+            {t('footer.nav_title', 'Tautan Navigasi')}
           </h4>
           <ul className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
+              const linkName = t(link.key, link.name);
               return (
                 <li key={link.href}>
                   <Link
@@ -99,8 +105,12 @@ export default function PublicFooter() {
                         : 'text-zinc-600 dark:text-zinc-400 hover:text-blue-700 dark:hover:text-blue-300'
                     }`}
                   >
-                    <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-blue-700 dark:text-blue-400' : 'opacity-40'}`} />
-                    <span className="truncate">{link.name}</span>
+                    <ChevronRight
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        isActive ? 'text-blue-700 dark:text-blue-400' : 'opacity-40'
+                      }`}
+                    />
+                    <span className="truncate">{linkName}</span>
                   </Link>
                 </li>
               );
@@ -108,23 +118,26 @@ export default function PublicFooter() {
           </ul>
         </div>
 
-        {/* Kolom 3: Ajakan Bertanya & Menuju Halaman Kontak (Span 4) - Menyatu dengan Footer Tanpa Card BG */}
+        {/* Kolom 3: Ajakan Bertanya & Menuju Halaman Kontak */}
         <div className="space-y-3 md:col-span-4">
           <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-bold text-xs">
             <MessageSquare className="w-4 h-4 shrink-0" />
             <h4 className="text-blue-950 dark:text-zinc-100 uppercase tracking-wider">
-              Ada Pertanyaan Seputar Pemilu?
+              {t('footer.ask_title', 'Ada Pertanyaan Seputar Pemilu?')}
             </h4>
           </div>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Punya kendala status pemilih, ingin berkonsultasi mengenai tahapan, atau ingin menyampaikan aspirasi kepada panitia KPU Mahasiswa?
+            {t(
+              'footer.ask_desc',
+              'Punya kendala status pemilih, ingin berkonsultasi mengenai tahapan, atau ingin menyampaikan aspirasi kepada panitia KPU Mahasiswa?'
+            )}
           </p>
           <div className="pt-1">
             <Link
               href="/contact"
               className="inline-flex items-center justify-between gap-2 w-full px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white dark:bg-blue-600 dark:hover:bg-blue-500 font-semibold text-xs shadow-xs transition-all group"
             >
-              <span>Hubungi Panitia & Kirim Pesan</span>
+              <span>{t('footer.ask_btn', 'Hubungi Panitia & Kirim Pesan')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -133,8 +146,12 @@ export default function PublicFooter() {
 
       {/* Baris Bawah: Hak Cipta */}
       <div className="max-w-7xl mx-auto pt-6 border-t border-blue-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500">
-        <p>© {new Date().getFullYear()} Komisi Pemilihan Umum Mahasiswa Politeknik LP3I. Seluruh hak cipta dilindungi.</p>
-        <p className="text-blue-900/60 dark:text-zinc-500 font-medium">Sistem Informasi Terpadu Pemilu Raya BEM</p>
+        <p>
+          © {new Date().getFullYear()} {t('footer.copyright', 'Komisi Pemilihan Umum Mahasiswa Politeknik LP3I. Seluruh hak cipta dilindungi.')}
+        </p>
+        <p className="text-blue-900/60 dark:text-zinc-500 font-medium">
+          {t('footer.sub_system', 'Sistem Informasi Terpadu Pemilu Raya BEM')}
+        </p>
       </div>
     </footer>
   );

@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Compass, X, ArrowDown } from 'lucide-react';
 import { TIMING_CONFIG } from '@/lib/timingConfig';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function MobileNavHint() {
+  const { t } = useTranslation();
   const [showHint, setShowHint] = useState(false);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function MobileNavHint() {
               <Compass className="w-3.5 h-3.5" />
             </div>
             <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-              Navigasi Halaman
+              {t('hint.title', 'Navigasi Halaman')}
             </span>
           </div>
 
@@ -62,7 +64,7 @@ export default function MobileNavHint() {
 
         {/* Teks Petunjuk */}
         <p className="text-[11.5px] text-zinc-600 dark:text-zinc-300 leading-relaxed">
-          Menu utama dan bilik voting tersedia melalui panel navigasi di bagian bawah layar Anda.
+          {t('hint.desc', 'Menu utama dan bilik voting tersedia melalui panel navigasi di bagian bawah layar Anda.')}
         </p>
 
         {/* Action Button & Panah Arah ke Navbar Bawah */}
@@ -72,7 +74,7 @@ export default function MobileNavHint() {
             onClick={handleDismiss}
             className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
           >
-            Mengerti
+            {t('hint.btn', 'Mengerti')}
           </button>
 
           {/* Elemen tanda panah terarah ke navbar bawah */}

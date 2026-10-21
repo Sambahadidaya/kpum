@@ -457,6 +457,208 @@ CREATE POLICY "auth all jadwal_voting" ON jadwal_voting
 alter table mhs add column kelas varchar(50) check (kelas in ('Reg','NonReg','Manaj','Dosen'));
 
 alter table roleadmin add column jenis varchar(50) default 'Editor' check (jenis in ('Viewer','Editor')) ;
+
+-- Menggantikan src/data/faqDataAi.js
+CREATE TABLE IF NOT EXISTS ai_faq (
+  id         uuid         PRIMARY KEY DEFAULT uuid_generate_v4(),
+  kategori   varchar(80)  NOT NULL,
+  pertanyaan text         NOT NULL,
+  jawaban    text         NOT NULL,
+  urutan     smallint     DEFAULT 1,        -- smallint: hemat, max 32767
+  is_active  bool         DEFAULT TRUE,
+  created_at timestamptz  DEFAULT now(),
+  updated_at timestamptz  DEFAULT now()
+);
+
+ALTER TABLE ai_faq ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public read ai_faq"  ON ai_faq FOR SELECT TO public      USING (is_active = TRUE);
+CREATE POLICY "auth all ai_faq"     ON ai_faq FOR ALL    TO authenticated USING (TRUE) WITH CHECK (TRUE);
+
+-- SEED CONTOH (migrasi dari faqDataAi.js)
+INSERT INTO ai_faq (kategori, pertanyaan, jawaban, urutan) VALUES
+  ('Umum & Profil KPU',
+   'Apa itu KPU Mahasiswa Politeknik LP3I?',
+   'Komisi Pemilihan Umum (KPU) Mahasiswa Politeknik LP3I adalah lembaga independen penyelenggara Pemilihan Umum Raya Mahasiswa untuk memilih Presiden dan Wakil Presiden BEM secara jujur, adil, transparan, dan demokratis.',
+   1),
+  ('Syarat Pemilih',
+   'Siapa saja yang memiliki hak suara dalam Pemilu BEM?',
+   'Seluruh mahasiswa aktif Politeknik LP3I yang terdaftar dalam Daftar Pemilih Tetap (DPT) dan memiliki Kartu Tanda Mahasiswa (KTM) aktif.',
+   2),
+  ('Tata Cara Memilih',
+   'Bagaimana tata cara dan mekanisme pemungutan suara?',
+   'Mahasiswa datang ke TPS yang ditentukan, menunjukkan KTM, verifikasi kehadiran, ambil surat suara, coblos di bilik suara, masukkan ke kotak suara, dan celupkan jari ke tinta.',
+   3),
+  ('Syarat Kandidat',
+   'Apa saja syarat mendaftar sebagai Capresma dan Cawapresma?',
+   E'1. Mahasiswa aktif minimal semester 3, maksimal semester 5.\n2. IPK minimal 3.00.\n3. Tidak sedang terkena sanksi akademik.\n4. Pernah aktif di organisasi kemahasiswaan LP3I.\n5. Serahkan formulir, visi-misi, CV, dan berkas resmi KPU.',
+   4),
+  ('Tahapan & Jadwal',
+   'Apa saja tahapan resmi Pemilu BEM?',
+   E'1. Sosialisasi & Pembukaan Pendaftaran.\n2. Verifikasi Berkas & Penetapan Nomor Urut.\n3. Kampanye Terbuka dan Debat Kandidat.\n4. Masa Tenang.\n5. Pemungutan & Penghitungan Suara.\n6. Penetapan dan Pelantikan.',
+   5),
+  ('Pengaduan & Kontak',
+   'Bagaimana jika menemukan kecurangan atau ingin bertanya?',
+   'Hubungi panitia KPU melalui menu Kontak di website (WhatsApp & Email resmi), atau datang langsung ke Sekretariat KPU Mahasiswa di Gedung Kampus LP3I.',
+   6);
+
+-- Satu baris konfigurasi aktif; hindari multi-row dengan is_active
+CREATE TABLE IF NOT EXISTS ai_setting (
+  id                    uuid         PRIMARY KEY DEFAULT uuid_generate_v4(),
+  system_prompt         text         NOT NULL,
+  -- Bahasa diizinkan disimpan sebagai teks CSV: 'id,en,ar' (lebih simpel dari array)
+  bahasa_diizinkan      varchar(200) DEFAULT 'id,en',
+  max_tokens            smallint     DEFAULT 500,
+  temperature           numeric(3,2) DEFAULT 1.0,
+  rate_limit_per_menit  smallint     DEFAULT 12,
+  updated_at            timestamptz  DEFAULT now()
+);
+
+ALTER TABLE ai_setting ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public read ai_setting" ON ai_setting FOR SELECT TO public      USING (TRUE);
+CREATE POLICY "auth all ai_setting"    ON ai_setting FOR ALL    TO authenticated USING (TRUE) WITH CHECK (TRUE);
+
+-- SEED: 1 baris konfigurasi default
+INSERT INTO ai_setting (system_prompt, bahasa_diizinkan, max_tokens, temperature, rate_limit_per_menit)
+VALUES (
+  E'Anda adalah "Sams Asisten", asisten cerdas virtual resmi dari KPU Mahasiswa Pemilu Presma BEM Politeknik LP3I.\nTugas Anda:\n1. Berikan informasi akurat, ramah, profesional seputar Pemilu Mahasiswa.\n2. Gunakan bahasa sopan dan mudah dipahami mahasiswa.\n3. Jawab berdasarkan data FAQ KPU jika relevan. Jika di luar konteks, arahkan ke menu Panduan atau Kontak.\n4. Jangan memihak paslon manapun. Jaga netralitas KPU.',
+  'id,en',
+  500,
+  1.0,
+  12
+);
+
+-- varchar pendek untuk status & session; text untuk konten panjang
+CREATE TABLE IF NOT EXISTS ai_log (
+  id               uuid         PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id       varchar(40),               -- nanoid pendek (opsional, anonim)
+  ip_address       varchar(45),               -- ipv4/ipv6 max 45 char
+  pertanyaan       text,
+  jawaban          text,
+  tokens_input     int2         DEFAULT 0,    -- smallint (int2): hemat, max 32767
+  tokens_output    int2         DEFAULT 0,
+  total_tokens     int2         DEFAULT 0,
+  processing_ms    int2         DEFAULT 0,    -- waktu proses server (ms)
+  latency_ms       int2         DEFAULT 0,    -- waktu tunggu client (ms)
+  -- 's'=success, 'e'=error, 'r'=rejected — char(1) paling hemat
+  status           char(1)      DEFAULT 's'   CHECK (status IN ('s','e','r')),
+  matched_faq      bool         DEFAULT FALSE,
+  error_msg        varchar(255),
+  created_at       timestamptz  DEFAULT now()
+);
+
+ALTER TABLE ai_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public insert ai_log" ON ai_log FOR INSERT TO public      WITH CHECK (TRUE);
+CREATE POLICY "auth all ai_log"      ON ai_log FOR ALL    TO authenticated USING (TRUE) WITH CHECK (TRUE);
+
+-- Index untuk query dashboard AI (filter by created_at & status)
+CREATE INDEX IF NOT EXISTS idx_ai_log_created ON ai_log (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_log_status  ON ai_log (status);
+
+-- SEED CONTOH
+INSERT INTO ai_log (session_id, ip_address, pertanyaan, jawaban, tokens_input, tokens_output, total_tokens, processing_ms, latency_ms, status, matched_faq)
+VALUES
+  ('abc123', '127.0.0.1', 'Apa itu KPU Mahasiswa?', 'KPU Mahasiswa adalah...', 120, 80, 200, 450, 800, 's', TRUE),
+  ('abc123', '127.0.0.1', 'Kapan pemilu dilaksanakan?', 'Jadwal pemilu...', 95, 110, 205, 380, 700, 's', FALSE),
+  ('xyz789', '192.168.1.1', 'Siapa presiden Indonesia?', 'Maaf pertanyaan di luar konteks...', 60, 40, 100, 200, 500, 'r', FALSE);
+
+CREATE TABLE IF NOT EXISTS site_language (
+  kode     varchar(5)   PRIMARY KEY,          -- 'id','en','ar','fr','ru' — PK langsung
+  nama     varchar(60)  NOT NULL,
+  flag     varchar(10)  NOT NULL,             -- Emoji flag
+  is_active bool        DEFAULT TRUE,
+  urutan   smallint     DEFAULT 1,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE site_language ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public read site_language" ON site_language FOR SELECT TO public      USING (is_active = TRUE);
+CREATE POLICY "auth all site_language"    ON site_language FOR ALL    TO authenticated USING (TRUE) WITH CHECK (TRUE);
+
+-- SEED bahasa awal
+INSERT INTO site_language (kode, nama, flag, urutan) VALUES
+  ('id', 'Indonesia',   '🇮🇩', 1),
+  ('en', 'English',     '🇬🇧', 2),
+  ('ar', 'العربية',     '🇸🇦', 3),
+  ('fr', 'Français',    '🇫🇷', 4),
+  ('ru', 'Русский',     '🇷🇺', 5),
+  ('ja', '日本語',       '🇯🇵', 6),
+  ('zh', '中文',         '🇨🇳', 7)
+ON CONFLICT (kode) DO NOTHING;
+
+-- key_teks + kode PK komposit — hemat storage, tidak perlu uuid
+CREATE TABLE IF NOT EXISTS site_translation (
+  kode         varchar(5)   NOT NULL REFERENCES site_language(kode) ON DELETE CASCADE,
+  key_teks     varchar(120) NOT NULL,       -- 'nav.beranda', 'hero.title', dll
+  value_teks   text         NOT NULL,
+  updated_at   timestamptz  DEFAULT now(),
+  PRIMARY KEY (kode, key_teks)             -- Composite PK, no uuid needed
+);
+
+ALTER TABLE site_translation ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public read site_translation" ON site_translation FOR SELECT TO public      USING (TRUE);
+CREATE POLICY "auth all site_translation"    ON site_translation FOR ALL    TO authenticated USING (TRUE) WITH CHECK (TRUE);
+
+-- Index untuk query semua key dalam satu bahasa (paling sering dipakai)
+CREATE INDEX IF NOT EXISTS idx_site_trans_kode ON site_translation (kode);
+
+-- SEED: Bahasa Indonesia (default — semua key)
+INSERT INTO site_translation (kode, key_teks, value_teks) VALUES
+  -- Navbar
+  ('id','nav.beranda','Beranda'), ('id','nav.kandidat','Kandidat'),
+  ('id','nav.paslon','Paslon'),   ('id','nav.voting','E-Voting'),
+  ('id','nav.simulasi','Simulasi'),('id','nav.panitia','Panitia'),
+  ('id','nav.dokumentasi','Dokumentasi'),('id','nav.panduan','Panduan'),
+  ('id','nav.kontak','Kontak'),
+  -- Hero / Beranda
+  ('id','hero.title','Pemilu Raya Mahasiswa'),
+  ('id','hero.subtitle','Komisi Pemilihan Umum • Politeknik LP3I'),
+  ('id','hero.cta','Lihat Kandidat'),
+  -- Kandidat
+  ('id','kandidat.title','Daftar Kandidat'),
+  ('id','kandidat.subtitle','Calon Presiden & Wakil Presiden Mahasiswa'),
+  -- Panduan
+  ('id','panduan.title','Panduan Pemilu'),
+  -- Dokumentasi
+  ('id','dokumentasi.title','Dokumentasi Kegiatan'),
+  -- Kontak
+  ('id','kontak.title','Hubungi KPU'),
+  ('id','kontak.nama','Nama Anda'),
+  ('id','kontak.pesan','Pesan / Pertanyaan'),
+  ('id','kontak.kirim','Kirim Pesan'),
+  -- Voting
+  ('id','voting.title','E-Voting Resmi'),
+  ('id','voting.kode_label','Masukkan Kode Voting'),
+  -- Umum
+  ('id','umum.loading','Memuat...'),
+  ('id','umum.error','Terjadi kesalahan'),
+  ('id','umum.lihat_semua','Lihat Semua')
+ON CONFLICT (kode, key_teks) DO NOTHING;
+
+-- SEED: Bahasa Inggris
+INSERT INTO site_translation (kode, key_teks, value_teks) VALUES
+  ('en','nav.beranda','Home'), ('en','nav.kandidat','Candidates'),
+  ('en','nav.paslon','Candidate Pairs'), ('en','nav.voting','E-Voting'),
+  ('en','nav.simulasi','Simulation'), ('en','nav.panitia','Committee'),
+  ('en','nav.dokumentasi','Documentation'), ('en','nav.panduan','Guide'),
+  ('en','nav.kontak','Contact'),
+  ('en','hero.title','Student General Election'),
+  ('en','hero.subtitle','Election Commission • Politeknik LP3I'),
+  ('en','hero.cta','View Candidates'),
+  ('en','kandidat.title','Candidate List'),
+  ('en','kandidat.subtitle','Presidential & Vice Presidential Candidates'),
+  ('en','panduan.title','Election Guide'),
+  ('en','dokumentasi.title','Activity Documentation'),
+  ('en','kontak.title','Contact KPU'),
+  ('en','kontak.nama','Your Name'),
+  ('en','kontak.pesan','Message / Question'),
+  ('en','kontak.kirim','Send Message'),
+  ('en','voting.title','Official E-Voting'),
+  ('en','voting.kode_label','Enter Voting Code'),
+  ('en','umum.loading','Loading...'),
+  ('en','umum.error','An error occurred'),
+  ('en','umum.lihat_semua','View All')
+ON CONFLICT (kode, key_teks) DO NOTHING;
+
 ```
 ### C. Struktur Folder Project Eksisting
 ```C:\Users\samba\OneDrive\Documents\WebKPU\web-kpu

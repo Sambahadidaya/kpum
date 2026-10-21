@@ -9,6 +9,7 @@ import {
   X,
 } from 'lucide-react';
 import { recordTrafikSosmed } from '@/api/publlic/panitia';
+import { useTranslation } from '@/hooks/useTranslation';
 
 /**
  * Helper untuk memformat URL sosial media
@@ -44,6 +45,7 @@ function formatSosmedLink(type, input) {
 }
 
 export default function PanitiaFullscreenModal({ panitia, onClose }) {
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -120,7 +122,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
             type="button"
             onClick={onClose}
             className="p-1.5 sm:p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition cursor-pointer"
-            title="Tutup Tampilan"
+            title={t('ui.close_view', 'Tutup Tampilan')}
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
@@ -142,7 +144,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600">
                 <UserCheck className="w-10 h-10 opacity-40 mb-1" />
-                <span className="text-[10px] sm:text-xs font-mono">Belum Ada Foto</span>
+                <span className="text-[10px] sm:text-xs font-mono">{t('ui.no_photo', 'Belum Ada Foto')}</span>
               </div>
             )}
           </div>
@@ -152,7 +154,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
             <div className="space-y-2.5 sm:space-y-3">
               <div>
                 <span className="text-[10px] sm:text-xs font-mono text-zinc-500 uppercase tracking-wider">
-                  Divisi Panitia
+                  {t('ui.committee_division', 'Divisi Panitia')}
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight mt-0.5">
                   {panitia.jabatan_panitia}
@@ -161,7 +163,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
 
               <div>
                 <span className="text-[10px] sm:text-xs font-mono text-zinc-500 uppercase tracking-wider">
-                  Spesifik Divisi Panitia
+                  {t('ui.committee_division_specific', 'Spesifik Divisi Panitia')}
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight mt-0.5">
                   {panitia.sub_jabatan_panitia}
@@ -170,7 +172,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
 
               <div>
                 <span className="text-[10px] sm:text-xs font-mono text-zinc-500 uppercase tracking-wider">
-                  Nama Panitia
+                  {t('ui.committee_name', 'Nama Panitia')}
                 </span>
                 <h2 className="text-lg sm:text-2xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight mt-0.5">
                   {panitia.nama_panitia}
@@ -179,7 +181,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
 
               <div>
                 <span className="text-[10px] sm:text-xs font-mono text-zinc-500 uppercase tracking-wider">
-                  Program Studi
+                  {t('ui.prodi', 'Program Studi')}
                 </span>
                 <p className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex items-center justify-center sm:justify-start gap-1.5 mt-0.5">
                   <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -190,7 +192,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
               {hasSosmed && (
                 <div className="pt-1.5 sm:pt-2">
                   <span className="text-[10px] sm:text-xs font-mono text-zinc-500 uppercase tracking-wider block mb-1.5">
-                    Tautan Kontak & Sosial Media
+                    {t('ui.social_links', 'Tautan Kontak & Sosial Media')}
                   </span>
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                     {waLink && (
@@ -255,7 +257,7 @@ export default function PanitiaFullscreenModal({ panitia, onClose }) {
             onClick={onClose}
             className="w-full sm:w-auto px-5 py-2 sm:py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold transition shadow-xs cursor-pointer text-center"
           >
-            Tutup Tampilan
+            {t('ui.close_view', 'Tutup Tampilan')}
           </button>
         </div>
       </div>

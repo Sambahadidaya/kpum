@@ -9,6 +9,7 @@ import {
   Maximize2,
 } from 'lucide-react';
 import { recordTrafikSosmed } from '@/api/publlic/panitia';
+import { useTranslation } from '@/hooks/useTranslation';
 
 /**
  * Helper untuk memformat URL sosial media
@@ -44,6 +45,7 @@ function formatSosmedLink(type, input) {
 }
 
 export default function PanitiaCard({ panitia, onEnlarge }) {
+  const { t } = useTranslation();
   const cardRef = useRef(null);
   const defaultRotateX = 1.5;
   const defaultRotateY = -2.5;
@@ -155,7 +157,7 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
 
               {/* Jabatan Panitia */}
               <h3 className="inline-flex items-center gap-2 text-base -mb-1 sm:text-lg md:text-xl font-bold text-zinc-900 dark:text-zinc-500 tracking-tight leading-snug group-hover:text-gray-900 dark:group-hover:text-zinc-100 transition-colors line-clamp-2">
-                <Briefcase className="w-3 h-3 text-zinc-900 dark:text-zinc-500 hover:text-zinc-400 dark:hover:text-zinc-400 shrink-0" />Jabatan :  {panitia.jabatan_panitia}
+                <Briefcase className="w-3 h-3 text-zinc-900 dark:text-zinc-500 hover:text-zinc-400 dark:hover:text-zinc-400 shrink-0" />{t('ui.position_label', 'Jabatan :')}  {panitia.jabatan_panitia}
               </h3>
               {/* sub_Jabatan Panitia */}
               <h4 className="text-base sm:text-lg md:text-md mb-8 font-bold text-zinc-900 dark:text-zinc-500 tracking-tight leading-snug group-hover:text-gray-900 dark:group-hover:text-zinc-100 transition-colors line-clamp-2">
@@ -164,7 +166,7 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
 
               {/* Nama Panitia */}
               <h5 className="text-base sm:text-lg md:text-xl font-bold text-zinc-900 dark:text-zinc-500 tracking-tight leading-snug group-hover:text-gray-900 dark:group-hover:text-zinc-100 transition-colors line-clamp-2">
-                Nama : {panitia.nama_panitia}
+                {t('ui.name_label', 'Nama :')} {panitia.nama_panitia}
               </h5>
 
               {/* Ikon Sosial Media Tepat di Bawah Nama Panitia */}
@@ -177,7 +179,7 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
                       rel="noopener noreferrer"
                       onClick={() => sosmedItem?.id && recordTrafikSosmed(sosmedItem.id, 'whatsapp')}
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/90 dark:hover:bg-zinc-700 text-zinc-700 hover:text-emerald-600 dark:text-zinc-300 dark:hover:text-emerald-400 border border-zinc-200/90 dark:border-zinc-700/80 flex items-center justify-center transition active:scale-95 shadow-2xs"
-                      title="Hubungi via WhatsApp"
+                      title={t('ui.contact_wa', 'Hubungi via WhatsApp')}
                     >
                       <i className="fa-brands fa-whatsapp text-xs sm:text-sm" />
                     </a>
@@ -189,7 +191,7 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
                       rel="noopener noreferrer"
                       onClick={() => sosmedItem?.id && recordTrafikSosmed(sosmedItem.id, 'instagram')}
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/90 dark:hover:bg-zinc-700 text-zinc-700 hover:text-pink-600 dark:text-zinc-300 dark:hover:text-pink-400 border border-zinc-200/90 dark:border-zinc-700/80 flex items-center justify-center transition active:scale-95 shadow-2xs"
-                      title="Kunjungi Instagram"
+                      title={t('ui.visit_ig', 'Kunjungi Instagram')}
                     >
                       <i className="fa-brands fa-instagram text-xs sm:text-sm" />
                     </a>
@@ -201,7 +203,7 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
                       rel="noopener noreferrer"
                       onClick={() => sosmedItem?.id && recordTrafikSosmed(sosmedItem.id, 'tiktok')}
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/90 dark:hover:bg-zinc-700 text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white border border-zinc-200/90 dark:border-zinc-700/80 flex items-center justify-center transition active:scale-95 shadow-2xs"
-                      title="Kunjungi TikTok"
+                      title={t('ui.visit_tiktok', 'Kunjungi TikTok')}
                     >
                       <i className="fa-brands fa-tiktok text-xs sm:text-sm" />
                     </a>
@@ -213,7 +215,7 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
                       rel="noopener noreferrer"
                       onClick={() => sosmedItem?.id && recordTrafikSosmed(sosmedItem.id, 'threads')}
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/90 dark:hover:bg-zinc-700 text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white border border-zinc-200/90 dark:border-zinc-700/80 flex items-center justify-center transition active:scale-95 shadow-2xs"
-                      title="Kunjungi Threads"
+                      title={t('ui.visit_threads', 'Kunjungi Threads')}
                     >
                       <i className="fa-brands fa-threads text-xs sm:text-sm" />
                     </a>
@@ -239,10 +241,10 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
                   if (onEnlarge) onEnlarge(panitia);
                 }}
                 className="relative z-20 inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-[11px] sm:text-xs font-semibold border border-zinc-200 dark:border-zinc-700 transition active:scale-95 cursor-pointer shadow-2xs"
-                title="Perbesar tampilan kartu"
+                title={t('ui.enlarge_card', 'Perbesar tampilan kartu')}
               >
                 <Maximize2 className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-300" />
-                <span>Perbesar</span>
+                <span>{t('ui.enlarge', 'Perbesar')}</span>
               </button>
             </div>
           </div>
@@ -264,7 +266,7 @@ export default function PanitiaCard({ panitia, onEnlarge }) {
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 p-2 text-center">
                   <UserCheck className="w-8 h-8 opacity-40 mb-1" />
-                  <span className="text-[9px] font-mono text-zinc-400">Foto Panitia</span>
+                  <span className="text-[9px] font-mono text-zinc-400">{t('ui.photo_committee', 'Foto Panitia')}</span>
                 </div>
               )}
             </div>

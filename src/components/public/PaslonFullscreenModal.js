@@ -13,8 +13,10 @@ import {
   Vote,
   ExternalLink,
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function PaslonFullscreenModal({ paslon, onClose }) {
+  const { t } = useTranslation();
   useEffect(() => {
     if (!paslon) return;
     const originalOverflow = document.body.style.overflow;
@@ -53,10 +55,10 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-black text-zinc-900 dark:text-zinc-100 leading-tight">
-                Pasangan Calon Nomor Urut {paslon.nomor_urut}
+                {t('ui.paslon_modal_title', 'Pasangan Calon Nomor Urut {n}', { n: paslon.nomor_urut })}
               </h2>
               <p className="text-[11px] text-zinc-500">
-                Calon Presiden & Wakil Presiden Mahasiswa
+                {t('ui.paslon_modal_sub', 'Calon Presiden & Wakil Presiden Mahasiswa')}
               </p>
             </div>
           </div>
@@ -64,7 +66,7 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
           <button
             onClick={onClose}
             className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition cursor-pointer"
-            aria-label="Tutup Detail"
+            aria-label={t('ui.close_detail', 'Tutup Detail')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -78,7 +80,7 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
               <Quote className="w-5 h-5 text-zinc-400 shrink-0 mt-0.5" />
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  Slogan & Gagasan Utama
+                  {t('ui.slogan_main', 'Slogan & Gagasan Utama')}
                 </span>
                 <p className="text-xs sm:text-sm italic font-medium text-zinc-800 dark:text-zinc-200 mt-0.5">
                   &ldquo;{paslon.slogan}&rdquo;
@@ -105,18 +107,18 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
                   </div>
                 )}
                 <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/80 text-[9px] font-bold text-white">
-                  Capresma
+                  {t('ui.capresma', 'Capresma')}
                 </span>
               </div>
 
               <div className="space-y-1.5 text-center sm:text-left flex-1 min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Calon Presiden Mahasiswa
+                  {t('ui.cand_president', 'Calon Presiden Mahasiswa')}
                 </span>
                 <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                   {k1.nama_kandidat}
                 </h3>
-                <p className="text-xs text-zinc-500 font-mono">NIM: {k1.nim_kandidat}</p>
+                <p className="text-xs text-zinc-500 font-mono">{t('ui.nim', 'NIM')}: {k1.nim_kandidat}</p>
                 <p className="text-xs text-zinc-700 dark:text-zinc-300 flex items-center justify-center sm:justify-start gap-1.5 pt-1">
                   <GraduationCap className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                   <span className="truncate">{k1.prodi_kandidat}</span>
@@ -142,18 +144,18 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
                       </div>
                     )}
                     <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/80 text-[9px] font-bold text-white">
-                      Cawapresma
+                      {t('ui.cawapresma', 'Cawapresma')}
                     </span>
                   </div>
 
                   <div className="space-y-1.5 text-center sm:text-left flex-1 min-w-0">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                      Calon Wakil Presiden
+                      {t('ui.cand_vice', 'Calon Wakil Presiden')}
                     </span>
                     <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                       {k2.nama_kandidat}
                     </h3>
-                    <p className="text-xs text-zinc-500 font-mono">NIM: {k2.nim_kandidat}</p>
+                    <p className="text-xs text-zinc-500 font-mono">{t('ui.nim', 'NIM')}: {k2.nim_kandidat}</p>
                     <p className="text-xs text-zinc-700 dark:text-zinc-300 flex items-center justify-center sm:justify-start gap-1.5 pt-1">
                       <GraduationCap className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
                       <span className="truncate">{k2.prodi_kandidat}</span>
@@ -164,10 +166,10 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
                 <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 text-zinc-400 space-y-1">
                   <UserCheck className="w-10 h-10 opacity-40" />
                   <p className="font-bold text-xs text-zinc-700 dark:text-zinc-300">
-                    Pencalonan Tunggal
+                    {t('ui.single_candidacy', 'Pencalonan Tunggal')}
                   </p>
                   <p className="text-[11px] text-zinc-500">
-                    Maju tanpa calon wakil presiden.
+                    {t('ui.single_candidacy_desc', 'Maju tanpa calon wakil presiden.')}
                   </p>
                 </div>
               )}
@@ -180,12 +182,12 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
             <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 space-y-2">
               <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100 font-bold text-sm">
                 <Compass className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                <h3>Visi Paslon</h3>
+                <h3>{t('ui.visi_paslon', 'Visi Paslon')}</h3>
               </div>
               <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
                 {detail1.visi || detail2.visi
                   ? `"${detail1.visi || detail2.visi}"`
-                  : 'Visi sedang dalam proses pemaparan debat terbuka.'}
+                  : t('ui.visi_paslon_empty', 'Visi sedang dalam proses pemaparan debat terbuka.')}
               </p>
             </div>
 
@@ -193,10 +195,10 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
             <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 space-y-2">
               <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100 font-bold text-sm">
                 <Target className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                <h3>Misi Pokok</h3>
+                <h3>{t('ui.misi_paslon', 'Misi Pokok')}</h3>
               </div>
               <div className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
-                {detail1.misi || detail2.misi || 'Poin-poin program kerja akan disampaikan pada agenda kampanye resmi.'}
+                {detail1.misi || detail2.misi || t('ui.misi_paslon_empty', 'Poin-poin program kerja akan disampaikan pada agenda kampanye resmi.')}
               </div>
             </div>
           </div>
@@ -204,12 +206,12 @@ export default function PaslonFullscreenModal({ paslon, onClose }) {
 
         {/* Footer Modal */}
         <div className="px-6 py-3.5 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex items-center justify-between text-xs text-zinc-500 shrink-0">
-          <span>Komisi Pemilihan Umum Mahasiswa LP3I</span>
+          <span>{t('ui.kpum_full', 'Komisi Pemilihan Umum Mahasiswa LP3I')}</span>
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold transition cursor-pointer"
           >
-            Tutup
+            {t('ui.close', 'Tutup')}
           </button>
         </div>
       </div>

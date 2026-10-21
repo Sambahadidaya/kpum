@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import BgWaveDivider from '@/components/public/bgWaveDivider';
 import { loginVotingMhs } from '@/api/publlic/voting';
 import { getStatusJadwalVoting } from '@/api/publlic/jadwalVoting';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   Vote,
   CreditCard,
@@ -17,9 +18,12 @@ import {
   Lock,
   Timer,
   AlertCircle,
+  HelpCircle,
 } from 'lucide-react';
+import ModalTutorialVoting from '@/components/public/ModalTutorialVoting';
 
 export default function VotingLoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -30,6 +34,7 @@ export default function VotingLoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [alreadyVotedWarning, setAlreadyVotedWarning] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(true);
 
   // State Jadwal & Waktu Server
   const [jadwalStatus, setJadwalStatus] = useState(null); // 'belum_dimulai' | 'berlangsung' | 'selesai' | 'tidak_ada_jadwal'
@@ -114,7 +119,7 @@ export default function VotingLoginPage() {
     const pad = (n) => String(n).padStart(2, '0');
 
     if (days > 0) {
-      return `${days} hari ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      return `${days} ${t('vt.days', 'hari')} ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     }
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
@@ -123,13 +128,13 @@ export default function VotingLoginPage() {
   const triggerPopup = (target) => {
     if (!isInputsDisabled) return;
 
-    let msg = 'Bilik suara belum dibuka oleh panitia.';
+    let msg = t('vt.popup_default', 'Bilik suara belum dibuka oleh panitia.');
     if (jadwalStatus === 'belum_dimulai') {
-      msg = 'Pemungutan suara belum dimulai. Silakan tunggu hitung mundur jadwal resmi.';
+      msg = t('vt.popup_not_started', 'Pemungutan suara belum dimulai. Silakan tunggu hitung mundur jadwal resmi.');
     } else if (jadwalStatus === 'selesai') {
-      msg = 'Waktu pemungutan suara telah selesai. Bilik suara sudah ditutup.';
+      msg = t('vt.popup_ended', 'Waktu pemungutan suara telah selesai. Bilik suara sudah ditutup.');
     } else if (jadwalStatus === 'tidak_ada_jadwal') {
-      msg = 'Jadwal voting belum diatur oleh Panitia KPU.';
+      msg = t('vt.popup_no_schedule', 'Jadwal voting belum diatur oleh Panitia KPU.');
     }
 
     if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
@@ -166,7 +171,7 @@ export default function VotingLoginPage() {
     }
 
     if (!formData.nim.trim() || !formData.kode_voting.trim()) {
-      setErrorText('Harap isi NIM dan Kode Voting secara lengkap.');
+      setErrorText(t('vt.err_fill', 'Harap isi NIM dan Kode Voting secara lengkap.'));
       return;
     }
 
@@ -179,7 +184,7 @@ export default function VotingLoginPage() {
       });
 
       if (!res.success) {
-        setErrorText(res.error || 'Autentikasi gagal. Periksa kembali data Anda.');
+        setErrorText(res.error || t('vt.err_auth', 'Autentikasi gagal. Periksa kembali data Anda.'));
         if (res.alreadyVoted) {
           setAlreadyVotedWarning(true);
         }
@@ -197,7 +202,7 @@ export default function VotingLoginPage() {
       // Berpindah ke bilik suara
       router.push('/voting/voting');
     } catch (err) {
-      setErrorText('Terjadi kendala saat menghubungi server. Silakan coba kembali.');
+      setErrorText(t('vt.err_server', 'Terjadi kendala saat menghubungi server. Silakan coba kembali.'));
       setLoading(false);
     }
   };
@@ -209,16 +214,28 @@ export default function VotingLoginPage() {
         <div className="max-w-4xl mx-auto text-center space-y-3 px-4 sm:px-6 lg:px-8 pb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-100/60 dark:bg-zinc-800/60 border border-blue-200/80 dark:border-blue-900/60 text-zinc-600 dark:text-zinc-400 text-xs font-semibold">
             <Vote className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-            <span>Autentikasi Hak Suara DPT</span>
+            <span>{t('vt.login_badge', 'Autentikasi Hak Suara DPT')}</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-blue-950 dark:text-zinc-100 tracking-tight">
-            Masuk Bilik Suara Elektronik
+            {t('vt.login_title', 'Masuk Bilik Suara Elektronik')}
           </h1>
 
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            Verifikasi identitas Anda dengan memasukkan NIM dan Kode Voting resmi yang Anda peroleh dari Panitia KPU Mahasiswa.
+            {t('vt.login_desc', 'Verifikasi identitas Anda dengan memasukkan NIM dan Kode Voting resmi yang Anda peroleh dari Panitia KPU Mahasiswa.')}
           </p>
+
+          {/* Tombol Buka Panduan & Tutorial Voting */}
+          <div className="flex justify-center pt-1">
+            <button
+              type="button"
+              onClick={() => setIsTutorialOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 shadow-xs hover:shadow-sm transition cursor-pointer"
+            >
+              <HelpCircle className="w-4 h-4 text-zinc-500" />
+              <span>{t('tutorial.btn_open', 'Panduan & Tutorial Voting')}</span>
+            </button>
+          </div>
         </div>
 
         {/* BgWaveDivider Sambungan Mulus */}
@@ -232,10 +249,10 @@ export default function VotingLoginPage() {
         <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xs hover:shadow-md transition space-y-6">
           <div className="border-b border-zinc-100 dark:border-zinc-800/80 pb-4 text-center">
             <h2 className="text-base sm:text-lg font-black text-zinc-900 dark:text-zinc-100">
-              Formulir Verifikasi Pemilih
+              {t('vt.login_form_title', 'Formulir Verifikasi Pemilih')}
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              Setiap User/Akun hanya dapat melakukan voting sebanyak 1 kali.
+              {t('vt.login_form_desc', 'Setiap User/Akun hanya dapat melakukan voting sebanyak 1 kali.')}
             </p>
           </div>
 
@@ -253,7 +270,7 @@ export default function VotingLoginPage() {
                 <span className="font-semibold block">{errorText}</span>
                 {alreadyVotedWarning && (
                   <span className="text-[11px] opacity-90 block">
-                    Jika Anda merasa belum pernah memilih namun status ini muncul, silakan hubungi Panitia KPU melalui menu Kontak.
+                    {t('vt.already_voted_help', 'Jika Anda merasa belum pernah memilih namun status ini muncul, silakan hubungi Panitia KPU melalui menu Kontak.')}
                   </span>
                 )}
               </div>
@@ -275,7 +292,7 @@ export default function VotingLoginPage() {
               )}
 
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Nomor Induk Mahasiswa (NIM) / ID UNIK
+                {t('vt.nim_label', 'Nomor Induk Mahasiswa (NIM) / ID UNIK')}
               </label>
 
               <div className="relative">
@@ -288,7 +305,7 @@ export default function VotingLoginPage() {
                       triggerPopup('nim');
                     }}
                     className="absolute inset-0 z-20 cursor-not-allowed bg-transparent"
-                    title="Bilik suara ditutup"
+                    title={t('vt.booth_closed_tip', 'Bilik suara ditutup')}
                   />
                 )}
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
@@ -299,7 +316,7 @@ export default function VotingLoginPage() {
                   name="nim"
                   value={formData.nim}
                   onChange={handleChange}
-                  placeholder="Contoh: 200101001 / XXXXXXX"
+                  placeholder={t('vt.nim_ph', 'Contoh: 200101001 / XXXXXXX')}
                   disabled={loading || isInputsDisabled}
                   required
                   className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-xs focus:outline-hidden focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 transition ${
@@ -325,7 +342,7 @@ export default function VotingLoginPage() {
               )}
 
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Kode Token Voting
+                {t('vt.code_label', 'Kode Token Voting')}
               </label>
 
               <div className="relative">
@@ -338,7 +355,7 @@ export default function VotingLoginPage() {
                       triggerPopup('kode_voting');
                     }}
                     className="absolute inset-0 z-20 cursor-not-allowed bg-transparent"
-                    title="Bilik suara ditutup"
+                    title={t('vt.booth_closed_tip', 'Bilik suara ditutup')}
                   />
                 )}
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
@@ -349,7 +366,7 @@ export default function VotingLoginPage() {
                   name="kode_voting"
                   value={formData.kode_voting}
                   onChange={handleChange}
-                  placeholder="Masukkan kode voting"
+                  placeholder={t('vt.code_ph', 'Masukkan kode voting')}
                   disabled={loading || isInputsDisabled}
                   required
                   className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border text-xs font-mono tracking-wider transition uppercase ${
@@ -360,7 +377,7 @@ export default function VotingLoginPage() {
                 />
               </div>
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
-                Kode token voting bersifat rahasia dan hanya diberikan oleh panitia KPU.
+                {t('vt.code_hint', 'Kode token voting bersifat rahasia dan hanya diberikan oleh panitia KPU.')}
               </p>
             </div>
 
@@ -387,7 +404,7 @@ export default function VotingLoginPage() {
                       triggerPopup('submit');
                     }}
                     className="absolute inset-0 z-20 cursor-not-allowed bg-transparent"
-                    title="Bilik suara ditutup"
+                    title={t('vt.booth_closed_tip', 'Bilik suara ditutup')}
                   />
                 )}
                 <button
@@ -402,16 +419,16 @@ export default function VotingLoginPage() {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Memvalidasi Data...</span>
+                      <span>{t('vt.validating', 'Memvalidasi Data...')}</span>
                     </>
                   ) : isInputsDisabled ? (
                     <>
                       <Lock className="w-4 h-4" />
-                      <span>Bilik Suara Ditutup</span>
+                      <span>{t('vt.booth_closed_btn', 'Bilik Suara Ditutup')}</span>
                     </>
                   ) : (
                     <>
-                      <span>Masuk ke Bilik Suara</span>
+                      <span>{t('vt.enter_booth', 'Masuk ke Bilik Suara')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -424,17 +441,17 @@ export default function VotingLoginPage() {
               {jadwalLoading ? (
                 <div className="inline-flex items-center gap-2 text-xs text-zinc-400">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Memeriksa jadwal resmi...</span>
+                  <span>{t('vt.checking_schedule', 'Memeriksa jadwal resmi...')}</span>
                 </div>
               ) : jadwalStatus === 'selesai' ? (
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-400">
                   <CheckCircle2 className="w-4 h-4 text-zinc-500" />
-                  <span>Waktu Voting Telah Selesai</span>
+                  <span>{t('vt.voting_ended', 'Waktu Voting Telah Selesai')}</span>
                 </div>
               ) : jadwalStatus === 'belum_dimulai' ? (
                 <div className="space-y-1">
                   <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 block">
-                    Bilik Suara Dibuka Dalam:
+                    {t('vt.opens_in', 'Bilik Suara Dibuka Dalam:')}
                   </span>
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono font-black text-zinc-900 dark:text-zinc-100">
                     <Clock className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
@@ -445,17 +462,17 @@ export default function VotingLoginPage() {
                 <div className="space-y-1">
                   <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 block flex items-center justify-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Bilik Suara Sedang Dibuka
+                    {t('vt.booth_open_now', 'Bilik Suara Sedang Dibuka')}
                   </span>
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono font-black text-zinc-900 dark:text-zinc-100">
                     <Timer className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
-                    <span>Sisa Waktu: {formatCountdown(countdownSeconds)}</span>
+                    <span>{t('vt.time_left_label', 'Sisa Waktu: {time}', { time: formatCountdown(countdownSeconds) })}</span>
                   </div>
                 </div>
               ) : (
                 <div className="inline-flex items-center gap-1.5 text-xs text-zinc-400">
                   <AlertCircle className="w-3.5 h-3.5" />
-                  <span>Jadwal pemungutan suara belum ditentukan.</span>
+                  <span>{t('vt.no_schedule', 'Jadwal pemungutan suara belum ditentukan.')}</span>
                 </div>
               )}
             </div>
@@ -465,11 +482,17 @@ export default function VotingLoginPage() {
           <div className="pt-2 text-center border-t border-zinc-100 dark:border-zinc-800/80">
             <span className="text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center justify-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              Sistem E-Voting KPUM Politeknik LP3I Bandung
+              {t('vt.footer_system', 'Sistem E-Voting KPUM Politeknik LP3I Bandung')}
             </span>
           </div>
         </div>
       </div>
+
+      {/* Modal Tutorial Voting */}
+      <ModalTutorialVoting
+        isOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
+      />
     </div>
   );
 }

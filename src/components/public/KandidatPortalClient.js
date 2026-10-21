@@ -4,8 +4,14 @@ import { useState, useMemo } from 'react';
 import KandidatCard from '@/components/public/KandidatCard';
 import KandidatFullscreenModal from '@/components/public/KandidatFullscreenModal';
 import { Users, Info, CheckCircle2, XCircle } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useTranslatedData } from '@/hooks/useTranslatedData';
+import { getPublikKandidat } from '@/api/publlic/kandidat';
+import TranslatingNotice from '@/components/public/TranslatingNotice';
 
-export default function KandidatPortalClient({ kandidatList = [] }) {
+export default function KandidatPortalClient() {
+  const { t } = useTranslation();
+  const { data: kandidatList, loading, translating } = useTranslatedData('kandidat', getPublikKandidat);
   const [selectedKandidat, setSelectedKandidat] = useState(null);
 
   // Sorting: yang lolos seleksi (!is_eliminated) di atas, yang tereliminasi (is_eliminated) di bawah
@@ -21,6 +27,18 @@ export default function KandidatPortalClient({ kandidatList = [] }) {
   const totalLolos = kandidatList.filter((k) => !k.is_eliminated).length;
   const totalEliminasi = kandidatList.filter((k) => k.is_eliminated).length;
 
+  if (loading) {
+    return translating ? (
+      <TranslatingNotice show fullHeight />
+    ) : (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {[1, 2].map((n) => (
+          <div key={n} className="h-56 rounded-3xl bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Banner Informasi Status Seleksi Pemilu */}
@@ -31,10 +49,13 @@ export default function KandidatPortalClient({ kandidatList = [] }) {
           </div>
           <div>
             <h2 className="text-xs sm:text-sm font-bold text-blue-950 dark:text-zinc-100">
-              Tahapan Seleksi Berkas & Verifikasi Kandidat
+              {t('kandidat.banner_title', 'Tahapan Seleksi Berkas & Verifikasi Kandidat')}
             </h2>
             <p className="text-[11px] sm:text-xs text-blue-900/80 dark:text-zinc-400 leading-relaxed">
-              Saat ini KPU Mahasiswa sedang melaksanakan tahapan verifikasi berkas dan uji kualifikasi calon. Kandidat di bawah ini ditampilkan berdasarkan status hasil verifikasi seleksi.
+              {t(
+                'kandidat.banner_desc',
+                'Saat ini KPU Mahasiswa sedang melaksanakan tahapan verifikasi berkas dan uji kualifikasi calon. Kandidat di bawah ini ditampilkan berdasarkan status hasil verifikasi seleksi.'
+              )}
             </p>
           </div>
         </div>
@@ -43,12 +64,12 @@ export default function KandidatPortalClient({ kandidatList = [] }) {
         <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-zinc-900/90 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/50 text-[10px] sm:text-xs font-bold shadow-2xs">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{totalLolos} Lolos</span>
+            <span>{totalLolos} {t('kandidat.lolos', 'Lolos')}</span>
           </span>
           {totalEliminasi > 0 && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-zinc-900/90 text-red-700 dark:text-red-400 border border-red-200/80 dark:border-red-900/50 text-[10px] sm:text-xs font-bold shadow-2xs">
               <XCircle className="w-3.5 h-3.5" />
-              <span>{totalEliminasi} Tereliminasi</span>
+              <span>{totalEliminasi} {t('kandidat.tereliminasi', 'Tereliminasi')}</span>
             </span>
           )}
         </div>
@@ -61,10 +82,13 @@ export default function KandidatPortalClient({ kandidatList = [] }) {
             <Users className="w-6 h-6" />
           </div>
           <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-            Belum Ada Data Kandidat
+            {t('kandidat.empty_title', 'Belum Ada Data Kandidat')}
           </h3>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Daftar calon kandidat akan segera ditampilkan setelah tahapan pendaftaran dan verifikasi berkas dibuka oleh panitia.
+            {t(
+              'kandidat.empty_desc',
+              'Daftar calon kandidat akan segera ditampilkan setelah tahapan pendaftaran dan verifikasi berkas dibuka oleh panitia.'
+            )}
           </p>
         </div>
       ) : (

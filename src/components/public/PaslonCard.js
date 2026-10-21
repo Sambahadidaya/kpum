@@ -8,8 +8,10 @@ import {
   CheckCircle2,
   Quote,
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
+  const { t } = useTranslation();
   const k1 = paslon.kandidat1 || {};
   const k2 = paslon.kandidat2;
   const detail1 = k1.detail_kandidat || {};
@@ -32,7 +34,7 @@ export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 flex flex-col items-center justify-center shrink-0 shadow-xs">
                 <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 leading-none">
-                  NO
+                  {t('ui.paslon_no', 'NO')}
                 </span>
                 <span className="text-base sm:text-lg font-black leading-none mt-0.5">
                   {paslon.nomor_urut}
@@ -41,10 +43,10 @@ export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
 
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Paslon Resmi BEM
+                  {t('ui.paslon_official', 'Paslon Resmi BEM')}
                 </span>
                 <h3 className="text-base sm:text-lg font-black text-zinc-900 dark:text-zinc-100 tracking-tight leading-snug">
-                  Pasangan Calon No. {paslon.nomor_urut}
+                  {t('ui.paslon_card_title', 'Pasangan Calon No. {n}', { n: paslon.nomor_urut })}
                 </h3>
               </div>
             </div>
@@ -54,7 +56,7 @@ export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
               {/* Capresma */}
               <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 block">
-                  Capresma
+                  {t('ui.capresma', 'Capresma')}
                 </span>
                 <p className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
                   {k1.nama_kandidat || '-'}
@@ -67,10 +69,10 @@ export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
               {/* Cawapresma */}
               <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 block">
-                  Cawapresma
+                  {t('ui.cawapresma', 'Cawapresma')}
                 </span>
                 <p className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                  {k2?.nama_kandidat || 'Pencalonan Tunggal'}
+                  {k2?.nama_kandidat || t('ui.single_candidacy', 'Pencalonan Tunggal')}
                 </p>
                 <p className="text-[10px] text-zinc-500 font-mono truncate">
                   {k2 ? `${k2.nim_kandidat} • ${k2.prodi_kandidat}` : '-'}
@@ -100,10 +102,10 @@ export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
                 if (onEnlarge) onEnlarge(paslon);
               }}
               className="relative z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs font-semibold border border-zinc-200 dark:border-zinc-700 transition active:scale-95 cursor-pointer shadow-2xs"
-              title="Perbesar Profil & Visi Misi"
+              title={t('ui.enlarge_title', 'Perbesar Profil & Visi Misi')}
             >
               <Maximize2 className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-300" />
-              <span>Perbesar Detail</span>
+              <span>{t('ui.enlarge_detail', 'Perbesar Detail')}</span>
             </button>
 
             {actionButton && (
@@ -132,11 +134,11 @@ export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 p-2 text-center">
                 <UserCheck className="w-7 h-7 opacity-40 mb-1" />
-                <span className="text-[8px] font-mono">Capres</span>
+                <span className="text-[8px] font-mono">{t('ui.capres', 'Capres')}</span>
               </div>
             )}
             <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/75 text-[8px] font-bold text-white tracking-wide">
-              Capres
+              {t('ui.capres', 'Capres')}
             </span>
           </div>
 
@@ -153,11 +155,11 @@ export default function PaslonCard({ paslon, onEnlarge, actionButton = null }) {
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 p-2 text-center">
                 <UserCheck className="w-7 h-7 opacity-40 mb-1" />
-                <span className="text-[8px] font-mono">Cawapres</span>
+                <span className="text-[8px] font-mono">{t('ui.cawapres', 'Cawapres')}</span>
               </div>
             )}
             <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/75 text-[8px] font-bold text-white tracking-wide">
-              Cawapres
+              {t('ui.cawapres', 'Cawapres')}
             </span>
           </div>
         </div>

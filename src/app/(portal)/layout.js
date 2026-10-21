@@ -5,26 +5,29 @@ import SamsAsisten from '@/components/SamsAsisten';
 import ClientTracker from '@/components/ClientTracker';
 import SiteBackground from '@/components/SiteBackground';
 import MobileNavHint from '@/components/public/mobileNavHint';
+import { LanguageProvider } from '@/lib/LanguageContext';
 
 export default function PortalLayout({ children }) {
   return (
-    <div className="relative min-h-screen flex flex-col pb-16 md:pb-0">
-      <SiteBackground />
-      <Suspense fallback={null}>
-        <ClientTracker />
-      </Suspense>
-      <PublicNavbar />
+    <LanguageProvider>
+      <div className="relative min-h-screen flex flex-col pb-16 md:pb-0">
+        <SiteBackground />
+        <Suspense fallback={null}>
+          <ClientTracker />
+        </Suspense>
+        <PublicNavbar />
 
-      <main className="flex-1 flex flex-col">{children}</main>
+        <main className="flex-1 flex flex-col">{children}</main>
 
-      {/* Floating Sams Asisten AI */}
-      <SamsAsisten />
+        {/* Floating Sams Asisten AI */}
+        <SamsAsisten />
 
-      {/* Petunjuk Navigasi Bawah Khusus Mobile (Muncul 1x per sesi) */}
-      <MobileNavHint />
+        {/* Petunjuk Navigasi Bawah Khusus Mobile (Muncul 1x per sesi) */}
+        <MobileNavHint />
 
-      {/* Footer Publik KPU Mahasiswa */}
-      <PublicFooter />
-    </div>
+        {/* Footer Publik KPU Mahasiswa */}
+        <PublicFooter />
+      </div>
+    </LanguageProvider>
   );
 }

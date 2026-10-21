@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BgWaveDivider from '@/components/public/bgWaveDivider';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   FlaskConical,
   CreditCard,
@@ -11,7 +12,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Info,
+  HelpCircle,
 } from 'lucide-react';
+import ModalTutorialVoting from '@/components/public/ModalTutorialVoting';
 
 // Akun demo yang sudah disiapkan untuk simulasi
 const DEMO_ACCOUNT = {
@@ -22,6 +25,7 @@ const DEMO_ACCOUNT = {
 };
 
 export default function SimulasiLoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -31,6 +35,7 @@ export default function SimulasiLoginPage() {
 
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState('');
+  const [isTutorialOpen, setIsTutorialOpen] = useState(true);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +51,7 @@ export default function SimulasiLoginPage() {
     setErrorText('');
 
     if (!formData.nim.trim() || !formData.kode_voting.trim()) {
-      setErrorText('Harap isi NIM dan Kode Voting simulasi secara lengkap.');
+      setErrorText(t('sm.err_fill', 'Harap isi NIM dan Kode Voting simulasi secara lengkap.'));
       return;
     }
 
@@ -75,16 +80,28 @@ export default function SimulasiLoginPage() {
         <div className="max-w-4xl mx-auto text-center space-y-3 px-4 sm:px-6 lg:px-8 pb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100/70 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-900/60 text-amber-900 dark:text-amber-300 text-xs font-semibold">
             <FlaskConical className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-            <span>Mode Simulasi — Masuk Demo</span>
+            <span>{t('sm.login_badge', 'Mode Simulasi — Masuk Demo')}</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-amber-950 dark:text-zinc-100 tracking-tight">
-            Login Simulasi Bilik Suara
+            {t('sm.login_title', 'Login Simulasi Bilik Suara')}
           </h1>
 
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            Akun demo sudah terisi otomatis di bawah. Klik tombol masuk untuk langsung mencoba pengalaman voting.
+            {t('sm.login_desc', 'Akun demo sudah terisi otomatis di bawah. Klik tombol masuk untuk langsung mencoba pengalaman voting.')}
           </p>
+
+          {/* Tombol Buka Panduan & Tutorial Voting */}
+          <div className="flex justify-center pt-1">
+            <button
+              type="button"
+              onClick={() => setIsTutorialOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-zinc-900/90 border border-amber-200 dark:border-amber-900/60 text-zinc-700 dark:text-zinc-300 text-xs font-semibold hover:bg-amber-100/50 dark:hover:bg-amber-950/40 hover:text-zinc-900 dark:hover:text-zinc-100 shadow-xs hover:shadow-sm transition cursor-pointer"
+            >
+              <HelpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span>{t('tutorial.btn_open', 'Panduan & Tutorial Voting')}</span>
+            </button>
+          </div>
         </div>
 
         {/* BgWaveDivider Sambungan Mulus */}
@@ -99,18 +116,18 @@ export default function SimulasiLoginPage() {
         <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 flex items-start gap-2.5">
           <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-            <span className="font-bold">Mode Simulasi Aktif.</span> Anda dapat mengubah isian di bawah, 
-            namun akun ini tidak divalidasi ke database. Tidak ada data yang tersimpan.
+            <span className="font-bold">{t('sm.banner_a', 'Mode Simulasi Aktif.')}</span>{' '}
+            {t('sm.banner_b', 'Anda dapat mengubah isian di bawah, namun akun ini tidak divalidasi ke database. Tidak ada data yang tersimpan.')}
           </p>
         </div>
 
         <div className="bg-white dark:bg-zinc-950 border border-amber-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xs hover:shadow-md transition space-y-6">
           <div className="border-b border-zinc-100 dark:border-zinc-800/80 pb-4 text-center">
             <h2 className="text-base sm:text-lg font-black text-zinc-900 dark:text-zinc-100">
-              Formulir Login Simulasi
+              {t('sm.form_title', 'Formulir Login Simulasi')}
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              Akun demo sudah disiapkan — tidak diperlukan data asli.
+              {t('sm.form_desc', 'Akun demo sudah disiapkan — tidak diperlukan data asli.')}
             </p>
           </div>
 
@@ -126,7 +143,7 @@ export default function SimulasiLoginPage() {
             {/* Input NIM */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Nomor Induk Mahasiswa (NIM)
+                {t('sm.nim_label', 'Nomor Induk Mahasiswa (NIM)')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
@@ -137,20 +154,20 @@ export default function SimulasiLoginPage() {
                   name="nim"
                   value={formData.nim}
                   onChange={handleChange}
-                  placeholder="Contoh: DEMO-001"
+                  placeholder={t('sm.nim_ph', 'Contoh: DEMO-001')}
                   disabled={loading}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-amber-50/50 dark:bg-zinc-900 border border-amber-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-hidden focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-700 transition"
                 />
               </div>
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
-                Untuk simulasi, gunakan NIM demo yang sudah terisi atau isi bebas.
+                {t('sm.nim_hint', 'Untuk simulasi, gunakan NIM demo yang sudah terisi atau isi bebas.')}
               </p>
             </div>
 
             {/* Input Kode Voting */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Kode Token Voting (Simulasi)
+                {t('sm.code_label', 'Kode Token Voting (Simulasi)')}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
@@ -167,7 +184,7 @@ export default function SimulasiLoginPage() {
                 />
               </div>
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
-                Kode ini hanya untuk simulasi dan tidak divalidasi ke server.
+                {t('sm.code_hint', 'Kode ini hanya untuk simulasi dan tidak divalidasi ke server.')}
               </p>
             </div>
 
@@ -180,11 +197,11 @@ export default function SimulasiLoginPage() {
               {loading ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  <span>Memuat Bilik Simulasi...</span>
+                  <span>{t('sm.loading', 'Memuat Bilik Simulasi...')}</span>
                 </>
               ) : (
                 <>
-                  <span>Masuk ke Bilik Simulasi</span>
+                  <span>{t('sm.enter', 'Masuk ke Bilik Simulasi')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -195,11 +212,17 @@ export default function SimulasiLoginPage() {
           <div className="pt-2 text-center border-t border-zinc-100 dark:border-zinc-800/80">
             <span className="text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center justify-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              Simulasi E-Voting KPU Mahasiswa Politeknik LP3I
+              {t('sm.footer', 'Simulasi E-Voting KPU Mahasiswa Politeknik LP3I')}
             </span>
           </div>
         </div>
       </div>
+
+      {/* Modal Tutorial Voting */}
+      <ModalTutorialVoting
+        isOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { getPublikPanitia } from '@/api/publlic/panitia';
 import BgWaveDivider from '@/components/public/bgWaveDivider';
 import StrukturPanitiaClient from '@/components/public/StrukturPanitiaClient';
-import { ShieldCheck } from 'lucide-react';
+import PanitiaHeroHeader from '@/components/public/PanitiaHeroHeader';
 
 export const metadata = {
   title: 'Struktur Panitia KPU - Pemilu Raya Mahasiswa LP3I',
@@ -16,20 +16,7 @@ export default async function PanitiaPortalPage() {
     <div className="min-h-screen flex flex-col bg-transparent text-zinc-900 dark:text-zinc-100 transition-colors">
       {/* Hero Header Section dengan BgWaveDivider Mulus Full-Bleed */}
       <div className="relative pt-10 sm:pt-16 pb-0 bg-blue-50/60 dark:bg-[#0b0f19]">
-        <div className="max-w-7xl mx-auto text-center space-y-3 px-4 sm:px-6 lg:px-8 pb-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-100/70 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-xs font-semibold">
-            <ShieldCheck className="w-4 h-4 text-blue-700 dark:text-blue-400" />
-            <span>Penyelenggara Pemilu Raya Mahasiswa</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-blue-950 dark:text-zinc-100 tracking-tight">
-            Susunan Panitia KPU Mahasiswa
-          </h1>
-
-          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Mengenal jajaran panitia independen yang bertugas merencanakan, melaksanakan, dan mengawal seluruh tahapan Pemilihan Umum Mahasiswa Politeknik LP3I.
-          </p>
-        </div>
+        <PanitiaHeroHeader />
 
         {/* BgWaveDivider Sambungan Mulus Tanpa Garis Border Terputus */}
         <div className="w-full -mb-px leading-none">

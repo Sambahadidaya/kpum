@@ -7,6 +7,9 @@ import { getYouTubeEmbedUrl } from '@/utils/youtubeUtils';
 import { getGoogleDriveEmbedUrl } from '@/utils/driveUtils';
 import { getNextMidnightWIBTimestamp } from '@/utils/dateUtils';
 import BgWaveDivider from '@/components/public/bgWaveDivider';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useTranslatedData } from '@/hooks/useTranslatedData';
+import TranslatingNotice from '@/components/public/TranslatingNotice';
 import {
   BookOpen,
   Menu,
@@ -18,53 +21,18 @@ import {
   HelpCircle,
 } from 'lucide-react';
 
-const CACHE_KEY_DATA = 'kpu_panduan_cache_data';
-const CACHE_KEY_EXP = 'kpu_panduan_cache_exp';
-
 export default function PanduanPortalPage() {
-  const [panduanList, setPanduanList] = useState([]);
+  const { t } = useTranslation();
+  const { data: panduanList, loading, translating } = useTranslatedData('panduan', getPublikPanduan);
   const [activeItemId, setActiveItemId] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  // Load data dengan strategi Cache LocalStorage kedaluwarsa 00:00 WIB
+  // Set item aktif pertama saat data siap
   useEffect(() => {
-    async function loadPanduan() {
-      try {
-        const cachedData = localStorage.getItem(CACHE_KEY_DATA);
-        const cachedExp = localStorage.getItem(CACHE_KEY_EXP);
-        const now = Date.now();
-
-        if (cachedData && cachedExp && now < Number(cachedExp)) {
-          const parsed = JSON.parse(cachedData);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setPanduanList(parsed);
-            if (parsed[0]?.items?.[0]) {
-              setActiveItemId(`item-${parsed[0].items[0].id}`);
-            }
-            setLoading(false);
-            return;
-          }
-        }
-
-        const res = await getPublikPanduan();
-        if (res.success && res.data) {
-          setPanduanList(res.data);
-          if (res.data[0]?.items?.[0]) {
-            setActiveItemId(`item-${res.data[0].items[0].id}`);
-          }
-          localStorage.setItem(CACHE_KEY_DATA, JSON.stringify(res.data));
-          localStorage.setItem(CACHE_KEY_EXP, String(getNextMidnightWIBTimestamp()));
-        }
-      } catch (err) {
-        console.error('Error loading panduan:', err);
-      } finally {
-        setLoading(false);
-      }
+    if (panduanList?.[0]?.items?.[0]) {
+      setActiveItemId(`item-${panduanList[0].items[0].id}`);
     }
-
-    loadPanduan();
-  }, []);
+  }, [panduanList]);
 
   // Scrollspy: pantau section mana yang sedang terlihat di viewport
   useEffect(() => {
@@ -106,13 +74,13 @@ export default function PanduanPortalPage() {
         <div className="max-w-7xl mx-auto space-y-3 px-4 sm:px-6 lg:px-8 pb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/70 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-xs font-semibold">
             <BookOpen className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
-            <span>Pusat Petunjuk Teknis & Regulasi</span>
+            <span>{t('panduan.badge', 'Pusat Petunjuk Teknis & Regulasi')}</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-black text-blue-950 dark:text-zinc-100 tracking-tight">
-            Panduan Pemilihan Umum Mahasiswa
+            {t('panduan.title', 'Panduan Pemilihan Umum Mahasiswa')}
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-            Pelajari tata tertib pemilihan, verifikasi DPT, ketentuan pencalonan, serta video tutorial resmi pelaksanaan pemungutan suara BEM Politeknik LP3I.
+            {t('panduan.subtitle', 'Pelajari tata tertib pemilihan, verifikasi DPT, ketentuan pencalonan, serta video tutorial resmi pelaksanaan pemungutan suara BEM Politeknik LP3I.')}
           </p>
         </div>
 
@@ -129,11 +97,11 @@ export default function PanduanPortalPage() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-zinc-900 border border-blue-200 dark:border-zinc-800 text-xs font-semibold text-blue-950 dark:text-zinc-200 cursor-pointer"
         >
           {mobileMenuOpen ? <X className="w-4 h-4 text-blue-700 dark:text-blue-400" /> : <Menu className="w-4 h-4 text-blue-700 dark:text-blue-400" />}
-          <span>Daftar Menu Panduan</span>
+          <span>{t('pg.pan_menu_list', 'Daftar Menu Panduan')}</span>
         </button>
 
         <span className="text-[11px] text-blue-700 dark:text-blue-400 font-semibold truncate max-w-[200px]">
-          Petunjuk Teknis
+          {t('pg.pan_tech_short', 'Petunjuk Teknis')}
         </span>
       </div>
 
@@ -181,10 +149,10 @@ export default function PanduanPortalPage() {
             <div className="pb-3 border-b border-blue-100 dark:border-zinc-800">
               <span className="text-xs font-bold text-blue-950 dark:text-zinc-100 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-blue-700 dark:text-blue-400" />
-                PETUNJUK TEKNIS PEMILU
+                {t('pg.pan_sidebar_title', 'PETUNJUK TEKNIS PEMILU')}
               </span>
               <p className="text-[11px] text-blue-700 dark:text-blue-400 font-semibold mt-1">
-                KPU Mahasiswa LP3I
+                {t('pg.pan_sidebar_sub', 'KPU Mahasiswa LP3I')}
               </p>
             </div>
 
@@ -231,7 +199,9 @@ export default function PanduanPortalPage() {
 
         {/* Right Main Content */}
         <section className="flex-1 min-w-0 space-y-12 pb-16">
-          {loading ? (
+          {loading && translating ? (
+            <TranslatingNotice show fullHeight />
+          ) : loading ? (
             <div className="space-y-8">
               {[1, 2].map((n) => (
                 <div key={n} className="h-64 rounded-3xl bg-blue-50/40 dark:bg-zinc-900/60 border border-blue-100 dark:border-zinc-800 animate-pulse p-6" />
@@ -240,9 +210,9 @@ export default function PanduanPortalPage() {
           ) : panduanList.length === 0 ? (
             <div className="p-12 text-center rounded-3xl bg-white dark:bg-zinc-950 border border-blue-100 dark:border-zinc-800 max-w-md mx-auto space-y-3 shadow-xs">
               <BookOpen className="w-12 h-12 text-blue-300 dark:text-zinc-600 mx-auto" />
-              <h2 className="text-base font-bold text-blue-950 dark:text-zinc-100">Panduan Sedang Dipersiapkan</h2>
+              <h2 className="text-base font-bold text-blue-950 dark:text-zinc-100">{t('pg.pan_empty_title', 'Panduan Sedang Dipersiapkan')}</h2>
               <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                Materi petunjuk teknis pemilihan akan segera dipublikasikan oleh Panitia KPU.
+                {t('pg.pan_empty_desc', 'Materi petunjuk teknis pemilihan akan segera dipublikasikan oleh Panitia KPU.')}
               </p>
             </div>
           ) : (
@@ -273,7 +243,7 @@ export default function PanduanPortalPage() {
                         <div className="space-y-2">
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-[11px] font-mono">
                             <Hash className="w-3 h-3 text-blue-700 dark:text-blue-400" />
-                            <span>Materi Panduan</span>
+                            <span>{t('pg.pan_material', 'Materi Panduan')}</span>
                           </div>
                           <h3 className="text-lg sm:text-xl font-bold text-blue-950 dark:text-zinc-100">
                             {sub.sub_judul}
@@ -286,7 +256,7 @@ export default function PanduanPortalPage() {
                             <div className="flex items-center justify-between pb-2 px-1 text-[11px] text-zinc-600 dark:text-zinc-400">
                               <span className="flex items-center gap-1.5 font-medium text-zinc-800 dark:text-zinc-200">
                                 <Video className="w-3.5 h-3.5 text-zinc-500" />
-                                Video Panduan Edukasi
+                                {t('pg.pan_video', 'Video Panduan Edukasi')}
                               </span>
                               {sub.link_vidio && (
                                 <a
@@ -295,7 +265,7 @@ export default function PanduanPortalPage() {
                                   rel="noreferrer"
                                   className="hover:underline flex items-center gap-1 transition text-zinc-700 dark:text-zinc-300"
                                 >
-                                  <span>Buka Sumber</span>
+                                  <span>{t('pg.pan_open_source', 'Buka Sumber')}</span>
                                   <ExternalLink className="w-3 h-3" />
                                 </a>
                               )}

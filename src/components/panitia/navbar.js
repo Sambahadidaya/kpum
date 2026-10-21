@@ -28,6 +28,10 @@ import {
   ClipboardList,
   PanelLeftClose,
   PanelLeftOpen,
+  Bot,
+  Sparkles,
+  Languages,
+  History,
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { logoutPanitia } from '@/api/panitia/auth';
@@ -96,9 +100,19 @@ const MENU_GROUPS = [
     ],
   },
   {
+    id: 'ai',
+    title: 'AI Asisten',
+    items: [
+      { name: 'Dashboard AI', href: '/panitia/ai', icon: Bot, permission: 'ai' },
+      { name: 'Log Riwayat AI', href: '/panitia/ai/log', icon: History, permission: 'ai' },
+      { name: 'Setting FAQ & Prompt', href: '/panitia/ai/setting', icon: Sparkles, permission: 'ai' },
+    ],
+  },
+  {
     id: 'setting',
     title: 'Setting',
     items: [
+      { name: 'Setting Translate', href: '/panitia/translate', icon: Languages, permission: 'translate', superAdminOnly: true },
       { name: 'Manajemen Akun', href: '/panitia/akun', icon: ShieldCheck, permission: 'akun', superAdminOnly: true },
       { name: 'Manajemen Role Akses', href: '/panitia/roleakses', icon: KeyRound, permission: 'roleakses', superAdminOnly: true },
     ],

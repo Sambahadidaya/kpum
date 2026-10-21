@@ -9,8 +9,10 @@ import {
   XCircle,
   FileBadge,
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function KandidatCard({ kandidat, onEnlarge }) {
+  const { t } = useTranslation();
   const detail = kandidat.detail_kandidat || {};
   const isEliminated = Boolean(kandidat.is_eliminated);
 
@@ -76,12 +78,12 @@ export default function KandidatCard({ kandidat, onEnlarge }) {
             {isEliminated ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/50 text-[10px] sm:text-xs font-bold">
                 <XCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>Tereliminasi</span>
+                <span>{t('kandidat.tereliminasi', 'Tereliminasi')}</span>
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 text-[10px] sm:text-xs font-bold">
                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>Lolos Seleksi</span>
+                <span>{t('kandidat.lolos', 'Lolos Seleksi')}</span>
               </span>
             )}
 
@@ -96,7 +98,7 @@ export default function KandidatCard({ kandidat, onEnlarge }) {
               title="Perbesar Profil & Visi Misi"
             >
               <Maximize2 className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-300" />
-              <span>Perbesar</span>
+              <span>{t('kandidat.btn_enlarge', 'Perbesar')}</span>
             </button>
           </div>
         </div>
@@ -117,7 +119,7 @@ export default function KandidatCard({ kandidat, onEnlarge }) {
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 p-2 text-center">
                 <UserCheck className="w-8 h-8 opacity-40 mb-1" />
-                <span className="text-[9px] font-mono text-zinc-400">Foto Calon</span>
+                <span className="text-[9px] font-mono text-zinc-400">{t('kandidat.photo_label', 'Foto Calon')}</span>
               </div>
             )}
           </div>

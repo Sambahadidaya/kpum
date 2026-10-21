@@ -4,21 +4,43 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bot, X, Send, RefreshCw, HelpCircle, ChevronDown, Move, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { chatDenganSamsAsisten } from '@/api/openai/route';
+import { getPublicAiFaq } from '@/api/publlic/ai';
 import { KPU_FAQ_DATA } from '@/data/faqDataAi';
 import { TIMING_CONFIG } from '@/lib/timingConfig';
-
-const INITIAL_MESSAGE = {
-  role: 'assistant',
-  content: 'Halo! Saya **Sams Asisten**, asisten cerdas resmi dari Komisi Pemilihan Umum (KPU) Mahasiswa Politeknik LP3I. Ada yang bisa saya bantu seputar tata cara, syarat pemilih, syarat calon, atau jadwal Pemilu Raya BEM?',
-};
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function SamsAsisten() {
+  const { t, lang } = useTranslation();
+
+  const getInitialMessage = useCallback(
+    () => ({
+      role: 'assistant',
+      content: t(
+        'sams.initial_message',
+        'Halo! Saya **Sams Asisten**, asisten cerdas resmi dari Komisi Pemilihan Umum (KPU) Mahasiswa Politeknik LP3I. Ada yang bisa saya bantu seputar tata cara, syarat pemilih, syarat calon, atau jadwal Pemilu Raya BEM?'
+      ),
+    }),
+    [t]
+  );
+
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
+  const [messages, setMessages] = useState(() => [getInitialMessage()]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [faqData, setFaqData] = useState(KPU_FAQ_DATA);
   const [showFaqList, setShowFaqList] = useState(false);
   const chatBottomRef = useRef(null);
+  const sessionIdRef = useRef('');
+
+  // Sinkronkan pesan pembuka jika user mengganti bahasa
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [getInitialMessage()];
+      }
+      return prev;
+    });
+  }, [getInitialMessage, lang]);
 
   // State Notifikasi Bubble (hanya tampil pertama kali dan persist per session)
   const [showNotif, setShowNotif] = useState(false);
@@ -35,9 +57,16 @@ export default function SamsAsisten() {
   const clickTimerRef = useRef(null);
   const holdTimerRef = useRef(null);
 
-  // Inisialisasi notifikasi dari sessionStorage dengan delay berantai
+  // Inisialisasi notifikasi & session ID
   useEffect(() => {
     try {
+      let currentSession = sessionStorage.getItem('sams_session_id');
+      if (!currentSession) {
+        currentSession = 'sams_' + Math.random().toString(36).substring(2, 10);
+        sessionStorage.setItem('sams_session_id', currentSession);
+      }
+      sessionIdRef.current = currentSession;
+
       const dismissed = sessionStorage.getItem('sams_notif_dismissed');
       if (!dismissed) {
         const timer = setTimeout(() => {
@@ -49,6 +78,47 @@ export default function SamsAsisten() {
       // ignore
     }
   }, []);
+
+  // Ambil basis data FAQ publik sesuai bahasa yang aktif (dengan caching sessionStorage)
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = `kpu_faq_lang_${lang}`;
+
+    if (lang !== 'id') {
+      try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setFaqData(parsed);
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    getPublicAiFaq(lang).then((res) => {
+      if (cancelled) return;
+      if (res.success && res.data && res.data.length > 0) {
+        setFaqData(res.data);
+        if (lang !== 'id') {
+          try {
+            sessionStorage.setItem(cacheKey, JSON.stringify(res.data));
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+    }).catch((err) => {
+      console.error('[SamsAsisten:FAQ error]:', err);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lang]);
 
   const handleDismissNotif = (e) => {
     e?.stopPropagation();
@@ -196,7 +266,7 @@ export default function SamsAsisten() {
     setLoading(true);
 
     try {
-      const res = await chatDenganSamsAsisten(newMessages);
+      const res = await chatDenganSamsAsisten(newMessages, sessionIdRef.current);
       if (res.success && res.reply) {
         setMessages([...newMessages, { role: 'assistant', content: res.reply }]);
       } else {
@@ -204,7 +274,7 @@ export default function SamsAsisten() {
           ...newMessages,
           {
             role: 'assistant',
-            content: res.error || 'Maaf, terjadi gangguan saat menghubungi server AI. Silakan coba kembali nanti.',
+            content: res.error || t('sams.err_server', 'Maaf, terjadi gangguan saat menghubungi server AI. Silakan coba kembali nanti.'),
           },
         ]);
       }
@@ -213,7 +283,7 @@ export default function SamsAsisten() {
         ...newMessages,
         {
           role: 'assistant',
-          content: 'Maaf, jaringan sedang sibuk. Silakan coba beberapa saat lagi.',
+          content: t('sams.err_busy', 'Maaf, jaringan sedang sibuk. Silakan coba beberapa saat lagi.'),
         },
       ]);
     } finally {
@@ -222,7 +292,7 @@ export default function SamsAsisten() {
   };
 
   const handleReset = () => {
-    setMessages([INITIAL_MESSAGE]);
+    setMessages([getInitialMessage()]);
     setShowFaqList(false);
   };
 
@@ -253,10 +323,10 @@ export default function SamsAsisten() {
             <div className="absolute right-15 bottom-0 flex items-center gap-2 pl-3.5 pr-2 py-2 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-blue-200/90 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xl whitespace-nowrap animate-in fade-in zoom-in-90 slide-in-from-right-3 duration-400 ease-out">
               <div className="flex flex-col text-left">
                 <span className="text-xs font-bold leading-tight text-blue-950 dark:text-zinc-100">
-                  Tanya Sams Asisten
+                  {t('sams.notif_title', 'Tanya Sams Asisten')}
                 </span>
                 <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
-                  AI Pemilu Raya LP3I
+                  {t('sams.notif_sub', 'AI Pemilu Raya LP3I')}
                 </span>
               </div>
 
@@ -264,9 +334,9 @@ export default function SamsAsisten() {
               <button
                 type="button"
                 onClick={handleDismissNotif}
-                title="Tutup Notifikasi"
+                title={t('sams.notif_close', 'Tutup Notifikasi')}
                 className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer ml-1"
-                aria-label="Tutup notifikasi Sams Asisten"
+                aria-label={t('sams.notif_close', 'Tutup Notifikasi')}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -286,15 +356,15 @@ export default function SamsAsisten() {
             }}
             title={
               isDragMode
-                ? 'Klik untuk mengunci posisi'
-                : 'Geser tombol ini untuk memindahkan Sams Asisten, atau klik untuk mengaktifkan mode geser'
+                ? t('sams.btn_drag_lock', 'Klik untuk mengunci posisi')
+                : t('sams.btn_drag_move', 'Geser tombol ini untuk memindahkan Sams Asisten, atau klik untuk mengaktifkan mode geser')
             }
             className={`absolute -top-2.5 -left-2.5 z-30 w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all touch-none cursor-grab active:cursor-grabbing ${
               isDragMode
                 ? 'bg-blue-600 text-white ring-2 ring-white dark:ring-zinc-950 scale-110'
                 : 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 hover:scale-110 active:scale-95'
             }`}
-            aria-label="Pindahkan posisi Sams Asisten"
+            aria-label={t('sams.btn_drag_move', 'Pindahkan posisi Sams Asisten')}
           >
             {isDragMode ? (
               <Check className="w-3.5 h-3.5" />
@@ -308,15 +378,15 @@ export default function SamsAsisten() {
             onPointerDown={handleBotPointerDown}
             title={
               isDragMode
-                ? 'Mode geser aktif. Geser untuk memindahkan, klik tombol centang untuk mengunci.'
-                : 'Klik untuk membuka chat. Klik 2x atau tahan untuk menggeser posisi.'
+                ? t('sams.bot_drag_mode', 'Mode geser aktif. Geser untuk memindahkan, klik tombol centang untuk mengunci.')
+                : t('sams.bot_click_mode', 'Klik untuk membuka chat. Klik 2x atau tahan untuk menggeser posisi.')
             }
             className={`relative w-13 h-13 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-300 select-none ${
               isDragMode
                 ? 'cursor-grab active:cursor-grabbing ring-4 ring-blue-500/80 scale-105 shadow-2xl bg-blue-700 text-white touch-none'
                 : 'cursor-pointer hover:scale-105 active:scale-95 shadow-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border border-zinc-700/80 dark:border-zinc-300 animate-sams-float'
             }`}
-            aria-label="Buka Asisten AI KPU"
+            aria-label={t('sams.header_title', 'Sams Asisten KPU')}
           >
             <Bot className="w-6 h-6" />
 
@@ -343,11 +413,11 @@ export default function SamsAsisten() {
               </div>
               <div>
                 <h3 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                  <span>Sams Asisten KPU</span>
+                  <span>{t('sams.header_title', 'Sams Asisten KPU')}</span>
                 </h3>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500" />
-                  Online • Pemilu Raya BEM LP3I
+                  {t('sams.header_status', 'Online • Pemilu Raya BEM LP3I')}
                 </p>
               </div>
             </div>
@@ -356,7 +426,7 @@ export default function SamsAsisten() {
               <button
                 type="button"
                 onClick={handleReset}
-                title="Reset Percakapan"
+                title={t('sams.reset_title', 'Reset Percakapan')}
                 className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -364,7 +434,7 @@ export default function SamsAsisten() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                title="Tutup Chat"
+                title={t('sams.close_title', 'Tutup Chat')}
                 className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -402,7 +472,7 @@ export default function SamsAsisten() {
                 <div className="w-6 h-6 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center shrink-0">
                   <Bot className="w-3.5 h-3.5 animate-spin" />
                 </div>
-                <span>Sams Asisten sedang merumuskan jawaban...</span>
+                <span>{t('sams.loading', 'Sams Asisten sedang merumuskan jawaban...')}</span>
               </div>
             )}
 
@@ -414,21 +484,21 @@ export default function SamsAsisten() {
             <div className="flex items-center justify-between pb-1.5">
               <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-1">
                 <HelpCircle className="w-3 h-3 text-zinc-500" />
-                Pertanyaan Populer Pemilu
+                {t('sams.faq_title', 'Pertanyaan Populer Pemilu')}
               </span>
               <button
                 type="button"
                 onClick={() => setShowFaqList(!showFaqList)}
                 className="text-[10px] text-zinc-700 dark:text-zinc-300 hover:underline flex items-center gap-0.5 cursor-pointer font-medium"
               >
-                {showFaqList ? 'Tutup Daftar' : 'Lihat Semua'}
+                {showFaqList ? t('sams.faq_close', 'Tutup Daftar') : t('sams.faq_see_all', 'Lihat Semua')}
                 <ChevronDown className={`w-3 h-3 transition-transform ${showFaqList ? 'rotate-180' : ''}`} />
               </button>
             </div>
 
             {showFaqList ? (
               <div className="max-h-28 overflow-y-auto space-y-1 py-1">
-                {KPU_FAQ_DATA.map((faq, idx) => (
+                {faqData.map((faq, idx) => (
                   <button
                     key={idx}
                     type="button"
@@ -442,7 +512,7 @@ export default function SamsAsisten() {
               </div>
             ) : (
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-                {KPU_FAQ_DATA.slice(0, 3).map((faq, idx) => (
+                {faqData.slice(0, 3).map((faq, idx) => (
                   <button
                     key={idx}
                     type="button"
@@ -469,7 +539,7 @@ export default function SamsAsisten() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Tanyakan seputar Pemilu KPU..."
+              placeholder={t('sams.input_ph', 'Tanyakan seputar Pemilu KPU...')}
               disabled={loading}
               className="flex-1 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 focus:outline-hidden focus:border-zinc-500 transition"
             />
@@ -477,7 +547,7 @@ export default function SamsAsisten() {
               type="submit"
               disabled={loading || !input.trim()}
               className="p-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 rounded-xl transition cursor-pointer"
-              aria-label="Kirim Pesan"
+              aria-label={t('sams.send_aria', 'Kirim Pesan')}
             >
               <Send className="w-4 h-4" />
             </button>

@@ -19,6 +19,7 @@ import {
   Info,
   RotateCcw,
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const DUMMY_PASLON_LIST = [
   {
@@ -112,6 +113,7 @@ const DUMMY_PASLON_LIST = [
 
 export default function BilikSimulasiPage() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [simSession, setSimSession] = useState(null);
   const [paslonList] = useState(DUMMY_PASLON_LIST);
@@ -149,7 +151,7 @@ export default function BilikSimulasiPage() {
   };
 
   const handleKeluarBilik = () => {
-    if (confirm('Apakah Anda ingin keluar dari bilik simulasi?')) {
+    if (confirm(t('sm.exit_confirm', 'Apakah Anda ingin keluar dari bilik simulasi?'))) {
       sessionStorage.removeItem('kpu_simulasi_session');
       router.push('/simulasi');
     }
@@ -188,7 +190,7 @@ export default function BilikSimulasiPage() {
           <div className="max-w-xl mx-auto text-center space-y-3 px-4 sm:px-6 pb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/70 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300 text-xs font-semibold">
               <FlaskConical className="w-4 h-4" />
-              <span>Simulasi Selesai</span>
+              <span>{t('sm.done_badge', 'Simulasi Selesai')}</span>
             </div>
 
             <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 flex items-center justify-center text-amber-700 dark:text-amber-300">
@@ -196,11 +198,15 @@ export default function BilikSimulasiPage() {
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black text-amber-950 dark:text-zinc-100 tracking-tight">
-              Simulasi Berhasil!
+              {t('sm.done_title', 'Simulasi Berhasil!')}
             </h1>
 
             <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-              Ini adalah hasil simulasi. Pilihan Anda <span className="font-bold text-amber-700 dark:text-amber-400">tidak disimpan</span> dan tidak memengaruhi hasil pemilihan resmi.
+              {t('sm.done_a', 'Ini adalah hasil simulasi. Pilihan Anda')}{' '}
+              <span className="font-bold text-amber-700 dark:text-amber-400">
+                {t('sm.done_b', 'tidak disimpan')}
+              </span>{' '}
+              {t('sm.done_c', 'dan tidak memengaruhi hasil pemilihan resmi.')}
             </p>
           </div>
 
@@ -213,13 +219,13 @@ export default function BilikSimulasiPage() {
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xs space-y-4 text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-semibold">
               <FlaskConical className="w-3.5 h-3.5" />
-              <span>Status: Simulasi Selesai</span>
+              <span>{t('sm.done_status', 'Status: Simulasi Selesai')}</span>
             </div>
 
             <div className="py-3 border-y border-zinc-100 dark:border-zinc-800 space-y-1">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Pilihan dalam Simulasi</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('sm.done_chosen', 'Pilihan dalam Simulasi')}</p>
               <p className="text-lg font-black text-zinc-900 dark:text-zinc-100">
-                Pasangan Calon No. {successInfo.nomorUrut}
+                {t('ui.paslon_card_title', 'Pasangan Calon No. {n}', { n: successInfo.nomorUrut })}
               </p>
               <p className="text-xs text-zinc-600 dark:text-zinc-400">
                 {successInfo.capres} {successInfo.cawapres ? `& ${successInfo.cawapres}` : ''}
@@ -235,7 +241,9 @@ export default function BilikSimulasiPage() {
             <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-left flex items-start gap-2">
               <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                Data simulasi ini <strong>tidak tersimpan</strong> ke database maupun penyimpanan lokal. Untuk voting resmi, gunakan menu E-Voting.
+                {t('sm.notice_a', 'Data simulasi ini')}{' '}
+                <strong>{t('sm.notice_b', 'tidak tersimpan')}</strong>{' '}
+                {t('sm.notice_c', 'ke database maupun penyimpanan lokal. Untuk voting resmi, gunakan menu E-Voting.')}
               </p>
             </div>
 
@@ -245,20 +253,20 @@ export default function BilikSimulasiPage() {
                 className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white dark:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold transition active:scale-95 cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Ulangi Simulasi</span>
+                <span>{t('sm.redo', 'Ulangi Simulasi')}</span>
               </button>
               <Link
                 href="/voting"
                 className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 text-xs font-bold transition active:scale-95"
               >
                 <Vote className="w-4 h-4" />
-                <span>Ke E-Voting Resmi</span>
+                <span>{t('pg.sim_to_official', 'Ke E-Voting Resmi')}</span>
               </Link>
               <Link
                 href="/"
                 className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition"
               >
-                <span>Kembali ke Beranda</span>
+                <span>{t('sm.to_home', 'Kembali ke Beranda')}</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -277,7 +285,8 @@ export default function BilikSimulasiPage() {
           <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-100/80 dark:bg-amber-950/40 border border-amber-300/70 dark:border-amber-800/50">
             <FlaskConical className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
             <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
-              <span className="font-black">Mode Simulasi Aktif</span> — Pilihan Anda tidak akan disimpan ke database maupun penyimpanan lokal.
+              <span className="font-black">{t('sm.booth_banner_a', 'Mode Simulasi Aktif')}</span>{' '}
+              {t('sm.booth_banner_b', '— Pilihan Anda tidak akan disimpan ke database maupun penyimpanan lokal.')}
             </p>
           </div>
 
@@ -289,11 +298,11 @@ export default function BilikSimulasiPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                  {simSession?.nama_mhs || 'Peserta Simulasi'}
+                  {simSession?.nama_mhs || t('sm.participant', 'Peserta Simulasi')}
                 </p>
                 <p className="text-[10px] text-zinc-500 font-mono">
-                  NIM: {simSession?.nim || 'DEMO-001'} •{' '}
-                  <span className="text-amber-700 dark:text-amber-400 font-semibold">Mode Simulasi</span>
+                  {t('ui.nim', 'NIM')}: {simSession?.nim || 'DEMO-001'} •{' '}
+                  <span className="text-amber-700 dark:text-amber-400 font-semibold">{t('sm.mode_label', 'Mode Simulasi')}</span>
                 </p>
               </div>
             </div>
@@ -303,16 +312,16 @@ export default function BilikSimulasiPage() {
               className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border border-zinc-200 dark:border-zinc-800 transition cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Keluar Simulasi</span>
+              <span>{t('sm.exit', 'Keluar Simulasi')}</span>
             </button>
           </div>
 
           <div className="text-center space-y-2 pt-2">
             <h1 className="text-2xl sm:text-4xl font-black text-amber-950 dark:text-zinc-100 tracking-tight">
-              Bilik Simulasi Pemilihan
+              {t('sm.booth_title', 'Bilik Simulasi Pemilihan')}
             </h1>
             <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
-              Geser kartu paslon untuk membandingkan calon, perbesar untuk meninjau visi-misi, lalu coba pilih salah satu.
+              {t('sm.booth_desc', 'Geser kartu paslon untuk membandingkan calon, perbesar untuk meninjau visi-misi, lalu coba pilih salah satu.')}
             </p>
           </div>
         </div>
@@ -337,11 +346,11 @@ export default function BilikSimulasiPage() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white dark:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <FlaskConical className="w-4 h-4" />
-                <span>Pilih Simulasi No. {paslon.nomor_urut}</span>
+                <span>{t('sm.pick', 'Pilih Simulasi No. {n}', { n: paslon.nomor_urut })}</span>
               </button>
             )}
-            emptyTitle="Belum Ada Pasangan Calon Resmi"
-            emptyDesc="Panitia KPU belum menetapkan daftar pasangan calon untuk pemilu saat ini."
+            emptyTitle={t('vt.booth_empty_title', 'Belum Ada Pasangan Calon Resmi')}
+            emptyDesc={t('vt.booth_empty_desc', 'Panitia KPU belum menetapkan daftar pasangan calon untuk pemilu saat ini.')}
           />
         )}
       </div>
@@ -356,7 +365,7 @@ export default function BilikSimulasiPage() {
                   <FlaskConical className="w-4 h-4" />
                 </div>
                 <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                  Konfirmasi Pilihan Simulasi
+                  {t('sm.confirm_title', 'Konfirmasi Pilihan Simulasi')}
                 </h3>
               </div>
               <button
@@ -374,7 +383,7 @@ export default function BilikSimulasiPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                  Pasangan Calon No. {selectedPaslon.nomor_urut}
+                  {t('ui.paslon_card_title', 'Pasangan Calon No. {n}', { n: selectedPaslon.nomor_urut })}
                 </p>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">
                   {selectedPaslon.kandidat1?.nama_kandidat}{' '}
@@ -387,11 +396,12 @@ export default function BilikSimulasiPage() {
             <div className="space-y-2 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed bg-amber-50 dark:bg-amber-950/20 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-800/40">
               <div className="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Ingat — Ini Mode Simulasi:</span>
+                <span>{t('sm.remember', 'Ingat — Ini Mode Simulasi:')}</span>
               </div>
               <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
-                Pilihan ini <strong>tidak disimpan</strong> ke database maupun penyimpanan lokal. 
-                Tidak ada efek pada hasil pemilihan resmi.
+                {t('sm.remember_a', 'Pilihan ini')}{' '}
+                <strong>{t('sm.remember_b', 'tidak disimpan')}</strong>{' '}
+                {t('sm.remember_c', 'ke database maupun penyimpanan lokal. Tidak ada efek pada hasil pemilihan resmi.')}
               </p>
             </div>
 
@@ -401,7 +411,7 @@ export default function BilikSimulasiPage() {
                 onClick={() => setConfirmModalOpen(false)}
                 className="flex-1 py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition cursor-pointer"
               >
-                Batal
+                {t('vt.cancel', 'Batal')}
               </button>
               <button
                 type="button"
@@ -409,7 +419,7 @@ export default function BilikSimulasiPage() {
                 className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white dark:bg-amber-600 dark:hover:bg-amber-500 text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
               >
                 <FlaskConical className="w-4 h-4" />
-                <span>Ya, Lanjutkan Simulasi</span>
+                <span>{t('sm.yes_continue', 'Ya, Lanjutkan Simulasi')}</span>
               </button>
             </div>
           </div>

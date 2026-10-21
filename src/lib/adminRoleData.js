@@ -98,7 +98,22 @@ export const AVAILABLE_PERMISSIONS = [
     desc: 'Melihat dan menindaklanjuti pesan kontak atau pengaduan masuk',
   },
 
+  // AI Asisten Chatbot
+  {
+    id: 'ai',
+    label: 'Dashboard & Setting AI',
+    category: 'AI Asisten',
+    desc: 'Pemantauan analitik bot dan pengelolaan basis pengetahuan (FAQ) AI',
+  },
+
   // Pengaturan Khusus SuperAdmin
+  {
+    id: 'translate',
+    label: 'Setting Bahasa & Translate',
+    category: 'Pengaturan Khusus (SuperAdmin)',
+    desc: 'Pengelolaan multi-bahasa dan teks terjemahan website',
+    superAdminOnly: true,
+  },
   {
     id: 'akun',
     label: 'Manajemen Akun Panitia',
@@ -131,6 +146,8 @@ export const ROLE_PERMISSIONS = {
     'jadwal',
     'panduan',
     'contact',
+    'ai',
+    'translate',
     'akun',
     'roleakses',
   ],
@@ -148,6 +165,7 @@ export const ROLE_PERMISSIONS = {
     'jadwal',
     'panduan',
     'contact',
+    'ai',
   ],
 };
 
@@ -165,6 +183,8 @@ export const PERMISSION_ROUTE_MAP = {
   jadwal: '/panitia/jadwal',
   panduan: '/panitia/panduan',
   contact: '/panitia/contact',
+  ai: '/panitia/ai',
+  translate: '/panitia/translate',
   akun: '/panitia/akun',
   roleakses: '/panitia/roleakses',
 };

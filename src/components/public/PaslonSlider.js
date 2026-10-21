@@ -4,13 +4,15 @@ import { useState, useRef, useEffect } from 'react';
 import PaslonCard from '@/components/public/PaslonCard';
 import PaslonFullscreenModal from '@/components/public/PaslonFullscreenModal';
 import { ChevronLeft, ChevronRight, Vote, SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function PaslonSlider({
   paslonList = [],
   renderAction = null,
-  emptyTitle = 'Belum Ada Pasangan Calon',
-  emptyDesc = 'Daftar pasangan calon akan segera diumumkan setelah penetapan nomor urut oleh panitia KPU.',
+  emptyTitle,
+  emptyDesc,
 }) {
+  const { t } = useTranslation();
   const [selectedPaslon, setSelectedPaslon] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const sliderRef = useRef(null);
@@ -45,10 +47,10 @@ export default function PaslonSlider({
           <Vote className="w-6 h-6" />
         </div>
         <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-          {emptyTitle}
+          {emptyTitle || t('ui.paslon_empty_title', 'Belum Ada Pasangan Calon')}
         </h3>
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          {emptyDesc}
+          {emptyDesc || t('ui.paslon_empty_desc', 'Daftar pasangan calon akan segera diumumkan setelah penetapan nomor urut oleh panitia KPU.')}
         </p>
       </div>
     );
@@ -61,7 +63,7 @@ export default function PaslonSlider({
         <div className="flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
           <SlidersHorizontal className="w-4 h-4 text-zinc-400" />
           <span>
-            Paslon {currentIndex + 1} dari {paslonList.length}
+            {t('ui.slider_of', 'Paslon {n} dari {total}', { n: currentIndex + 1, total: paslonList.length })}
           </span>
         </div>
 
@@ -72,8 +74,8 @@ export default function PaslonSlider({
             onClick={handlePrev}
             disabled={currentIndex === 0}
             className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-xs cursor-pointer active:scale-95"
-            aria-label="Geser ke Paslon Sebelumnya"
-            title="Sebelumnya"
+            aria-label={t('ui.prev_aria', 'Geser ke Paslon Sebelumnya')}
+            title={t('ui.prev', 'Sebelumnya')}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -83,8 +85,8 @@ export default function PaslonSlider({
             onClick={handleNext}
             disabled={currentIndex >= paslonList.length - 1}
             className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-xs cursor-pointer active:scale-95"
-            aria-label="Geser ke Paslon Berikutnya"
-            title="Berikutnya"
+            aria-label={t('ui.next_aria', 'Geser ke Paslon Berikutnya')}
+            title={t('ui.next', 'Berikutnya')}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -125,7 +127,7 @@ export default function PaslonSlider({
                   ? 'w-7 bg-zinc-900 dark:bg-zinc-100'
                   : 'w-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400'
               }`}
-              aria-label={`Lihat Paslon ${dotIdx + 1}`}
+              aria-label={t('ui.see_paslon', 'Lihat Paslon {n}', { n: dotIdx + 1 })}
             />
           ))}
         </div>
