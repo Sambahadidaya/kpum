@@ -53,20 +53,20 @@ export const PORTAL_NAV_STRUCTURE = [
     isDropdown: true,
     subItems: [
       {
-        name: 'Daftar Kandidat',
+        name: 'Pasangan Calon (Paslon)',
+        key: 'nav.pasangan_calon',
+        href: '/paslon',
+        icon: Users,
+        descKey: 'nav.desc_paslon',
+        desc: 'Daftar pasangan calon resmi',
+      },
+      {
+        name: 'Riwayat Kandidat',
         key: 'nav.daftar_kandidat',
         href: '/kandidat',
         icon: Users,
         descKey: 'nav.desc_kandidat',
         desc: 'Profil lengkap calon presma',
-      },
-      {
-        name: 'Pasangan Calon (Paslon)',
-        key: 'nav.pasangan_calon',
-        href: '/paslon',
-        icon: Vote,
-        descKey: 'nav.desc_paslon',
-        desc: 'Daftar pasangan calon resmi',
       },
     ],
   },
@@ -193,9 +193,9 @@ export default function PublicNavbar() {
   const activeMobileIndex = getActiveMobileIndex();
   const activeMobileItem =
     PORTAL_NAV_STRUCTURE[
-      mobileOpenDropdownId !== null
-        ? PORTAL_NAV_STRUCTURE.findIndex((item) => item.id === mobileOpenDropdownId)
-        : -1
+    mobileOpenDropdownId !== null
+      ? PORTAL_NAV_STRUCTURE.findIndex((item) => item.id === mobileOpenDropdownId)
+      : -1
     ];
 
   return (
@@ -239,11 +239,10 @@ export default function PublicNavbar() {
                   <Link
                     key={item.id}
                     href={item.href}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
-                      isGroupActive
-                        ? 'bg-blue-700 text-white shadow-xs dark:bg-blue-600 dark:text-white'
-                        : 'text-zinc-600 dark:text-zinc-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-zinc-900'
-                    }`}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${isGroupActive
+                      ? 'bg-blue-700 text-white shadow-xs dark:bg-blue-600 dark:text-white'
+                      : 'text-zinc-600 dark:text-zinc-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-zinc-900'
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{displayName}</span>
@@ -259,19 +258,17 @@ export default function PublicNavbar() {
                     onClick={() =>
                       setDesktopOpenDropdownId(isDropdownOpen ? null : item.id)
                     }
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none ${
-                      isGroupActive || isDropdownOpen
-                        ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60'
-                        : 'text-zinc-600 dark:text-zinc-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-zinc-900'
-                    }`}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none ${isGroupActive || isDropdownOpen
+                      ? 'bg-blue-50 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60'
+                      : 'text-zinc-600 dark:text-zinc-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-zinc-900'
+                      }`}
                     aria-expanded={isDropdownOpen}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{displayName}</span>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                        isDropdownOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : 'text-zinc-400'
-                      }`}
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : 'text-zinc-400'
+                        }`}
                     />
                   </button>
 
@@ -296,19 +293,17 @@ export default function PublicNavbar() {
                               <Link
                                 href={sub.href}
                                 onClick={() => setDesktopOpenDropdownId(null)}
-                                className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
-                                  isSubActive
-                                    ? 'bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300'
-                                    : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                                }`}
+                                className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${isSubActive
+                                  ? 'bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300'
+                                  : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                                  }`}
                               >
                                 <div className="flex items-center gap-3">
                                   <div
-                                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                                      isSubActive
-                                        ? 'bg-blue-600 text-white shadow-xs'
-                                        : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-                                    }`}
+                                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isSubActive
+                                      ? 'bg-blue-600 text-white shadow-xs'
+                                      : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
+                                      }`}
                                   >
                                     <SubIcon className="w-4 h-4" />
                                   </div>
@@ -322,11 +317,10 @@ export default function PublicNavbar() {
                                   </div>
                                 </div>
                                 <ChevronRight
-                                  className={`w-3.5 h-3.5 shrink-0 transition-transform ${
-                                    isSubActive
-                                      ? 'text-blue-600 dark:text-blue-400 translate-x-0.5'
-                                      : 'text-zinc-400'
-                                  }`}
+                                  className={`w-3.5 h-3.5 shrink-0 transition-transform ${isSubActive
+                                    ? 'text-blue-600 dark:text-blue-400 translate-x-0.5'
+                                    : 'text-zinc-400'
+                                    }`}
                                 />
                               </Link>
                             </li>
@@ -391,19 +385,17 @@ export default function PublicNavbar() {
                     <Link
                       href={sub.href}
                       onClick={() => setMobileOpenDropdownId(null)}
-                      className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
-                        isSubActive
-                          ? 'bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300'
-                          : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
-                      }`}
+                      className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${isSubActive
+                        ? 'bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300'
+                        : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300'
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                            isSubActive
-                              ? 'bg-blue-600 text-white shadow-xs'
-                              : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-                          }`}
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isSubActive
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
+                            }`}
                         >
                           <SubIcon className="w-4 h-4" />
                         </div>
@@ -417,11 +409,10 @@ export default function PublicNavbar() {
                         </div>
                       </div>
                       <ChevronRight
-                        className={`w-4 h-4 shrink-0 transition-transform ${
-                          isSubActive
-                            ? 'text-blue-600 dark:text-blue-400 translate-x-0.5'
-                            : 'text-zinc-400'
-                        }`}
+                        className={`w-4 h-4 shrink-0 transition-transform ${isSubActive
+                          ? 'text-blue-600 dark:text-blue-400 translate-x-0.5'
+                          : 'text-zinc-400'
+                          }`}
                       />
                     </Link>
                   </li>

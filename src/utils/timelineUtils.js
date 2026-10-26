@@ -16,7 +16,7 @@ export const TIMELINE_KPU_ITEMS = [
   },
   {
     no: '02',
-    tanggal: '21 OKTOBER 2026',
+    tanggal: '23 OKTOBER 2026',
     judul: 'Sosialisasi Kaprodi & Capresma',
     deskripsi:
       'Sosialisasi bersama Ketua Program Studi (Kaprodi) dan Calon Presiden Mahasiswa.',
@@ -26,7 +26,7 @@ export const TIMELINE_KPU_ITEMS = [
   },
   {
     no: '03',
-    tanggal: '23 OKTOBER 2026',
+    tanggal: '28 OKTOBER 2026',
     judul: 'Interview Pertama',
     deskripsi:
       'Pelaksanaan tahap wawancara (Interview Pertama) bagi pasangan calon Presiden dan Wakil Presiden Mahasiswa.',
@@ -36,17 +36,7 @@ export const TIMELINE_KPU_ITEMS = [
   },
   {
     no: '04',
-    tanggal: '26 OKTOBER 2026',
-    judul: 'Sosialisasi Dosen',
-    deskripsi:
-      'Kegiatan sosialisasi pemilihan umum raya mahasiswa kepada jajaran Dosen Politeknik LP3I.',
-    orderClass: 'order-3 lg:order-4',
-    desktopLine: 'down',
-    mobileLine: 'down',
-  },
-  {
-    no: '05',
-    tanggal: '27 OKTOBER 2026',
+    tanggal: '02 NOVEMBER 2026',
     judul: 'Interview Kedua',
     deskripsi:
       'Pelaksanaan tahap wawancara lanjutan (Interview Kedua) pendalaman materi dan komitmen kandidat.',
@@ -55,8 +45,18 @@ export const TIMELINE_KPU_ITEMS = [
     mobileLine: 'right',
   },
   {
+    no: '05',
+    tanggal: '04 NOVEMBER 2026',
+    judul: 'Sosialisasi Dosen&Capresma',
+    deskripsi:
+      'Kegiatan sosialisasi pemilihan umum raya mahasiswa kepada jajaran Dosen Politeknik LP3I Beserta dengan Calon Presiden Mahasiswa(Capresma).',
+    orderClass: 'order-3 lg:order-4',
+    desktopLine: 'down',
+    mobileLine: 'down',
+  },
+  {
     no: '06',
-    tanggal: '30 OKTOBER 2026',
+    tanggal: '09 NOVEMBER 2026',
     judul: 'Debat Tertutup',
     deskripsi:
       'Adu gagasan, pengujian visi-misi, serta program kerja kandidat dalam forum Debat Tertutup.',
@@ -66,7 +66,7 @@ export const TIMELINE_KPU_ITEMS = [
   },
   {
     no: '07',
-    tanggal: '10 NOVEMBER 2026',
+    tanggal: '23 NOVEMBER 2026',
     judul: 'Debat Terbuka',
     deskripsi:
       'Penyampaian visi-misi, orasi gagasan, dan Debat Terbuka di hadapan seluruh civitas akademika LP3I.',
@@ -76,7 +76,7 @@ export const TIMELINE_KPU_ITEMS = [
   },
   {
     no: '08',
-    tanggal: '12 NOVEMBER 2026',
+    tanggal: '25 NOVEMBER 2026',
     judul: 'Pencoblosan',
     deskripsi:
       'Hari pemungutan suara (Pencoblosan) serentak Presiden & Wakil Presiden Mahasiswa BEM Politeknik LP3I.',
